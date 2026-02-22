@@ -7,6 +7,46 @@
 
 ---
 
+## 画面イメージ一覧
+
+### 図 6.2: ログイン画面
+
+![ログイン画面](docs/images/01_login.svg)
+
+2カラムレイアウト。左側にTeamBoardブランドイメージ（グラデーション背景）、右側にメールアドレス・パスワード入力フォーム。
+
+### 図 6.3: ダッシュボード
+
+![ダッシュボード](docs/images/02_dashboard.svg)
+
+KPIカード（総プロジェクト数・進行中・総メンバー数・予算消化率）、プロジェクト進捗リスト、最近の更新履歴を表示。
+
+### 図 6.4: メンバー一覧
+
+![メンバー一覧](docs/images/03_members.svg)
+
+テーブル形式でメンバー情報を表示。アバター、名前、部署、役割、コスト（万円/月）、稼働率（プログレスバー）、操作ボタン。
+
+### 図 6.5: プロジェクト一覧
+
+![プロジェクト一覧](docs/images/04_projects.svg)
+
+カード形式でプロジェクトを表示。各カードに進捗バー、予算消化率、メンバーアバター群、ステータスバッジ。
+
+### 図 6.6: ガントチャート
+
+![ガントチャート](docs/images/05_gantt.svg)
+
+メンバー別グルーピングのタイムライン表示。タスクバーは色分け・進捗率オーバーレイ付き。D&Dで移動・並び替え可能。
+
+### 図 6.7: 予算ダッシュボード
+
+![予算ダッシュボード](docs/images/06_budget.svg)
+
+予算サマリーKPIカード、プロジェクト別の予算vs実績バーチャート、メンバー別コスト内訳ドーナツチャート。
+
+---
+
 ## 技術スタック
 
 | レイヤー | 技術 |
@@ -206,7 +246,14 @@ class Member(Document):
 | 1.4.5 | ログインページ実装 | `frontend/src/pages/LoginPage.tsx` |
 | 1.4.6 | 認証ガード（ProtectedRoute） | `frontend/src/App.tsx` |
 
-**ログイン画面の仕様（図6.2参照）:**
+**ログイン画面の仕様（[図6.2](#図-62-ログイン画面)参照）:**
+
+<details><summary>画面イメージを表示</summary>
+
+![ログイン画面](docs/images/01_login.svg)
+
+</details>
+
 - 2カラムレイアウト：左=ブランドイメージ（グラデーション背景 + アイコン）、右=ログインフォーム
 - Email + Password 入力フィールド
 - 「ログイン」ボタン（青系プライマリカラー）
@@ -295,7 +342,14 @@ class Project(Document):
 | 2.3.4 | 稼働率バー表示 | `frontend/src/components/members/UtilizationBar.tsx` |
 | 2.3.5 | メンバー一覧ページ統合 | `frontend/src/pages/MembersPage.tsx` |
 
-**メンバー一覧画面の仕様（図6.4参照）:**
+**メンバー一覧画面の仕様（[図6.4](#図-64-メンバー一覧)参照）:**
+
+<details><summary>画面イメージを表示</summary>
+
+![メンバー一覧](docs/images/03_members.svg)
+
+</details>
+
 - テーブルレイアウト：名前（アバター付き）、部署、役割、コスト（万円/月）、稼働率（プログレスバー）、操作ボタン
 - 「+ 新規メンバー」ボタン → モーダルフォーム
 - 検索・フィルター機能
@@ -311,7 +365,14 @@ class Project(Document):
 | 2.4.4 | プロジェクト作成/編集フォーム | `frontend/src/components/projects/ProjectForm.tsx` |
 | 2.4.5 | プロジェクト一覧ページ統合 | `frontend/src/pages/ProjectsPage.tsx` |
 
-**プロジェクト一覧画面の仕様（図6.5参照）:**
+**プロジェクト一覧画面の仕様（[図6.5](#図-65-プロジェクト一覧)参照）:**
+
+<details><summary>画面イメージを表示</summary>
+
+![プロジェクト一覧](docs/images/04_projects.svg)
+
+</details>
+
 - カード形式の一覧表示
 - 各カード：プロジェクト名、ステータスバッジ、期間、進捗バー、予算消化率、メンバーアバター群
 - 「+ 新規プロジェクト」ボタン
@@ -324,7 +385,14 @@ class Project(Document):
 | 2.5.1 | KPI カードコンポーネント | `frontend/src/components/common/KpiCard.tsx` |
 | 2.5.2 | ダッシュボードページ統合 | `frontend/src/pages/DashboardPage.tsx` |
 
-**ダッシュボード画面の仕様（図6.3参照）:**
+**ダッシュボード画面の仕様（[図6.3](#図-63-ダッシュボード)参照）:**
+
+<details><summary>画面イメージを表示</summary>
+
+![ダッシュボード](docs/images/02_dashboard.svg)
+
+</details>
+
 - KPIカード群：総プロジェクト数、進行中プロジェクト、総メンバー数、今月予算消化率
 - プロジェクト進捗サマリーリスト
 - 直近のアクティビティ
@@ -345,7 +413,14 @@ class Project(Document):
 | 3.1.6 | タスク API フック | `frontend/src/hooks/useTasks.ts` |
 | 3.1.7 | プロジェクト詳細ページ統合 | `frontend/src/pages/ProjectDetailPage.tsx` |
 
-**ガントチャート画面の仕様（図6.6参照）:**
+**ガントチャート画面の仕様（[図6.6](#図-66-ガントチャート)参照）:**
+
+<details><summary>画面イメージを表示</summary>
+
+![ガントチャート](docs/images/05_gantt.svg)
+
+</details>
+
 - 左ペイン：メンバー名 + タスク一覧（ツリー構造）
 - 右ペイン：タイムライン（月単位の横軸）
 - タスクバー：色分け（メンバーごと）、進捗率のオーバーレイ表示
@@ -374,7 +449,14 @@ class Project(Document):
 | 4.1.3 | 予算サマリーカード | `frontend/src/components/budget/BudgetSummary.tsx` |
 | 4.1.4 | 予算ダッシュボードページ統合 | `frontend/src/pages/BudgetPage.tsx` |
 
-**予算ダッシュボード画面の仕様（図6.7参照）:**
+**予算ダッシュボード画面の仕様（[図6.7](#図-67-予算ダッシュボード)参照）:**
+
+<details><summary>画面イメージを表示</summary>
+
+![予算ダッシュボード](docs/images/06_budget.svg)
+
+</details>
+
 - 上部：予算サマリーKPIカード（総予算、実績コスト、残予算、消化率）
 - 中央：予算 vs 実績の棒グラフ（プロジェクト別）
 - 下部：コスト内訳（メンバー別/プロジェクト別のドーナツチャート）

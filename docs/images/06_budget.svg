@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" font-family="Arial, sans-serif">
+  <rect width="960" height="620" fill="#F3F4F6"/>
+
+  <!-- Sidebar -->
+  <rect x="0" y="0" width="200" height="620" fill="#1E293B"/>
+  <text x="28" y="40" fill="white" font-size="18" font-weight="bold">📊 TeamBoard</text>
+  <rect x="0" y="60" width="200" height="1" fill="#334155"/>
+  <text x="44" y="100" fill="#94A3B8" font-size="13">📋 ダッシュボード</text>
+  <text x="44" y="132" fill="#94A3B8" font-size="13">👥 メンバー</text>
+  <text x="44" y="164" fill="#94A3B8" font-size="13">📁 プロジェクト</text>
+  <text x="44" y="196" fill="#94A3B8" font-size="13">📅 ガントチャート</text>
+  <rect x="8" y="204" width="184" height="36" rx="6" fill="#3B82F6" opacity="0.9"/>
+  <text x="44" y="228" fill="white" font-size="13">💰 予算管理</text>
+
+  <!-- Header -->
+  <rect x="200" y="0" width="760" height="56" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="224" y="35" fill="#1F2937" font-size="18" font-weight="bold">予算ダッシュボード</text>
+
+  <!-- KPI Summary Cards -->
+  <!-- Card 1: Total Budget -->
+  <rect x="216" y="72" width="170" height="80" rx="10" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="232" y="96" fill="#6B7280" font-size="11">総予算</text>
+  <text x="232" y="124" fill="#1F2937" font-size="22" font-weight="bold">2,800万円</text>
+  <rect x="216" y="72" width="170" height="4" rx="10" fill="#3B82F6"/>
+
+  <!-- Card 2: Actual Cost -->
+  <rect x="398" y="72" width="170" height="80" rx="10" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="414" y="96" fill="#6B7280" font-size="11">実績コスト</text>
+  <text x="414" y="124" fill="#F59E0B" font-size="22" font-weight="bold">915万円</text>
+  <rect x="398" y="72" width="170" height="4" rx="10" fill="#F59E0B"/>
+
+  <!-- Card 3: Remaining -->
+  <rect x="580" y="72" width="170" height="80" rx="10" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="596" y="96" fill="#6B7280" font-size="11">残予算</text>
+  <text x="596" y="124" fill="#10B981" font-size="22" font-weight="bold">1,885万円</text>
+  <rect x="580" y="72" width="170" height="4" rx="10" fill="#10B981"/>
+
+  <!-- Card 4: Consumption Rate -->
+  <rect x="762" y="72" width="170" height="80" rx="10" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="778" y="96" fill="#6B7280" font-size="11">全体消化率</text>
+  <text x="778" y="124" fill="#3B82F6" font-size="22" font-weight="bold">32.7%</text>
+  <rect x="762" y="72" width="170" height="4" rx="10" fill="#3B82F6"/>
+
+  <!-- Budget vs Actual Bar Chart -->
+  <rect x="216" y="170" width="480" height="320" rx="10" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="236" y="200" fill="#1F2937" font-size="15" font-weight="bold">予算 vs 実績（プロジェクト別）</text>
+
+  <!-- Legend -->
+  <rect x="530" y="188" width="12" height="12" rx="2" fill="#3B82F6"/>
+  <text x="548" y="199" fill="#6B7280" font-size="10">予算</text>
+  <rect x="590" y="188" width="12" height="12" rx="2" fill="#F59E0B"/>
+  <text x="608" y="199" fill="#6B7280" font-size="10">実績</text>
+
+  <!-- Y Axis Labels -->
+  <text x="240" y="232" fill="#9CA3AF" font-size="9">1200万</text>
+  <text x="240" y="272" fill="#9CA3AF" font-size="9">900万</text>
+  <text x="240" y="312" fill="#9CA3AF" font-size="9">600万</text>
+  <text x="240" y="352" fill="#9CA3AF" font-size="9">300万</text>
+  <text x="240" y="392" fill="#9CA3AF" font-size="9">0</text>
+
+  <!-- Grid Lines -->
+  <line x1="280" y1="228" x2="680" y2="228" stroke="#F3F4F6" stroke-width="1"/>
+  <line x1="280" y1="268" x2="680" y2="268" stroke="#F3F4F6" stroke-width="1"/>
+  <line x1="280" y1="308" x2="680" y2="308" stroke="#F3F4F6" stroke-width="1"/>
+  <line x1="280" y1="348" x2="680" y2="348" stroke="#F3F4F6" stroke-width="1"/>
+  <line x1="280" y1="388" x2="680" y2="388" stroke="#E5E7EB" stroke-width="1"/>
+
+  <!-- Bar Group 1: ECサイト -->
+  <rect x="300" y="308" width="30" height="80" rx="3" fill="#3B82F6"/>
+  <rect x="335" y="338" width="30" height="50" rx="3" fill="#F59E0B"/>
+  <text x="332" y="408" text-anchor="middle" fill="#6B7280" font-size="8">ECサイト</text>
+
+  <!-- Bar Group 2: モバイル -->
+  <rect x="395" y="262" width="30" height="126" rx="3" fill="#3B82F6"/>
+  <rect x="430" y="348" width="30" height="40" rx="3" fill="#F59E0B"/>
+  <text x="427" y="408" text-anchor="middle" fill="#6B7280" font-size="8">モバイル</text>
+
+  <!-- Bar Group 3: ポータル -->
+  <rect x="490" y="348" width="30" height="40" rx="3" fill="#3B82F6"/>
+  <rect x="525" y="354" width="30" height="34" rx="3" fill="#F59E0B"/>
+  <text x="522" y="408" text-anchor="middle" fill="#6B7280" font-size="8">ポータル</text>
+
+  <!-- Bar Group 4: データ基盤 -->
+  <rect x="585" y="228" width="30" height="160" rx="3" fill="#3B82F6"/>
+  <rect x="620" y="368" width="30" height="20" rx="3" fill="#F59E0B"/>
+  <text x="617" y="408" text-anchor="middle" fill="#6B7280" font-size="8">データ基盤</text>
+
+  <!-- Alert: over budget indicator -->
+  <rect x="236" y="430" width="440" height="40" rx="6" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1"/>
+  <text x="256" y="454" fill="#92400E" font-size="11">⚠️ 社内ポータル構築: 予算消化率 85% — 残予算 45万円（注意）</text>
+
+  <!-- Cost Breakdown Donut Chart -->
+  <rect x="710" y="170" width="226" height="320" rx="10" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="726" y="200" fill="#1F2937" font-size="15" font-weight="bold">コスト内訳</text>
+  <text x="726" y="218" fill="#9CA3AF" font-size="10">メンバー別</text>
+
+  <!-- Donut Chart (simplified) -->
+  <circle cx="823" cy="304" r="60" fill="none" stroke="#E5E7EB" stroke-width="24"/>
+  <circle cx="823" cy="304" r="60" fill="none" stroke="#3B82F6" stroke-width="24" stroke-dasharray="113 264" stroke-dashoffset="0" transform="rotate(-90 823 304)"/>
+  <circle cx="823" cy="304" r="60" fill="none" stroke="#10B981" stroke-width="24" stroke-dasharray="75 302" stroke-dashoffset="-113" transform="rotate(-90 823 304)"/>
+  <circle cx="823" cy="304" r="60" fill="none" stroke="#F59E0B" stroke-width="24" stroke-dasharray="56 321" stroke-dashoffset="-188" transform="rotate(-90 823 304)"/>
+  <circle cx="823" cy="304" r="60" fill="none" stroke="#8B5CF6" stroke-width="24" stroke-dasharray="38 340" stroke-dashoffset="-244" transform="rotate(-90 823 304)"/>
+  <circle cx="823" cy="304" r="36" fill="white"/>
+  <text x="823" y="301" text-anchor="middle" fill="#1F2937" font-size="12" font-weight="bold">915万</text>
+  <text x="823" y="316" text-anchor="middle" fill="#9CA3AF" font-size="9">合計</text>
+
+  <!-- Donut Legend -->
+  <rect x="730" y="386" width="10" height="10" rx="2" fill="#3B82F6"/>
+  <text x="746" y="395" fill="#4B5563" font-size="10">田中 (30%)</text>
+  <rect x="730" y="404" width="10" height="10" rx="2" fill="#10B981"/>
+  <text x="746" y="413" fill="#4B5563" font-size="10">佐藤 (20%)</text>
+  <rect x="730" y="422" width="10" height="10" rx="2" fill="#F59E0B"/>
+  <text x="746" y="431" fill="#4B5563" font-size="10">鈴木 (15%)</text>
+  <rect x="730" y="440" width="10" height="10" rx="2" fill="#8B5CF6"/>
+  <text x="746" y="449" fill="#4B5563" font-size="10">高橋 (10%)</text>
+  <rect x="730" y="458" width="10" height="10" rx="2" fill="#E5E7EB"/>
+  <text x="746" y="467" fill="#4B5563" font-size="10">その他 (25%)</text>
+
+  <!-- Caption -->
+  <rect x="0" y="590" width="960" height="30" fill="#1F2937" opacity="0.9"/>
+  <text x="480" y="610" text-anchor="middle" fill="white" font-size="12">図 6.7: 予算ダッシュボード — 予算vs実績比較 + コスト内訳ドーナツチャート</text>
+</svg>

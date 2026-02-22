@@ -1,0 +1,152 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" font-family="Arial, sans-serif">
+  <rect width="960" height="560" fill="#F3F4F6"/>
+
+  <!-- Sidebar -->
+  <rect x="0" y="0" width="200" height="560" fill="#1E293B"/>
+  <text x="28" y="40" fill="white" font-size="18" font-weight="bold">📊 TeamBoard</text>
+  <rect x="0" y="60" width="200" height="1" fill="#334155"/>
+  <text x="44" y="100" fill="#94A3B8" font-size="13">📋 ダッシュボード</text>
+  <text x="44" y="132" fill="#94A3B8" font-size="13">👥 メンバー</text>
+  <text x="44" y="164" fill="#94A3B8" font-size="13">📁 プロジェクト</text>
+  <rect x="8" y="172" width="184" height="36" rx="6" fill="#3B82F6" opacity="0.9"/>
+  <text x="44" y="196" fill="white" font-size="13">📅 ガントチャート</text>
+  <text x="44" y="232" fill="#94A3B8" font-size="13">💰 予算管理</text>
+
+  <!-- Header -->
+  <rect x="200" y="0" width="760" height="56" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="224" y="28" fill="#1F2937" font-size="18" font-weight="bold">ガントチャート</text>
+  <text x="224" y="46" fill="#9CA3AF" font-size="11">ECサイトリニューアル</text>
+  <rect x="832" y="14" width="96" height="32" rx="6" fill="#3B82F6"/>
+  <text x="880" y="35" text-anchor="middle" fill="white" font-size="12" font-weight="bold">+ タスク追加</text>
+
+  <!-- Left Panel (Task List) -->
+  <rect x="200" y="56" width="220" height="32" fill="#F9FAFB" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="216" y="77" fill="#6B7280" font-size="11" font-weight="bold">メンバー / タスク</text>
+  <text x="370" y="77" fill="#6B7280" font-size="11" font-weight="bold">人日</text>
+
+  <!-- Timeline Header -->
+  <rect x="420" y="56" width="540" height="32" fill="#F9FAFB" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="460" y="77" text-anchor="middle" fill="#6B7280" font-size="10">1月</text>
+  <line x1="500" y1="56" x2="500" y2="88" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="545" y="77" text-anchor="middle" fill="#6B7280" font-size="10">2月</text>
+  <line x1="590" y1="56" x2="590" y2="88" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="635" y="77" text-anchor="middle" fill="#1F2937" font-size="10" font-weight="bold">3月</text>
+  <line x1="680" y1="56" x2="680" y2="88" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="725" y="77" text-anchor="middle" fill="#6B7280" font-size="10">4月</text>
+  <line x1="770" y1="56" x2="770" y2="88" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="815" y="77" text-anchor="middle" fill="#6B7280" font-size="10">5月</text>
+  <line x1="860" y1="56" x2="860" y2="88" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="905" y="77" text-anchor="middle" fill="#6B7280" font-size="10">6月</text>
+
+  <!-- Today Line -->
+  <line x1="640" y1="88" x2="640" y2="520" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <rect x="630" y="85" width="20" height="14" rx="2" fill="#EF4444"/>
+  <text x="640" y="95" text-anchor="middle" fill="white" font-size="7">今日</text>
+
+  <!-- Member Group 1: 田中 -->
+  <rect x="200" y="88" width="220" height="32" fill="#EFF6FF" stroke="#E5E7EB" stroke-width="1"/>
+  <circle cx="224" cy="104" r="10" fill="#3B82F6"/>
+  <text x="224" y="108" text-anchor="middle" fill="white" font-size="8" font-weight="bold">田</text>
+  <text x="242" y="108" fill="#1F2937" font-size="12" font-weight="bold">田中 太郎</text>
+  <rect x="420" y="88" width="540" height="32" fill="#EFF6FF" stroke="#E5E7EB" stroke-width="0.5"/>
+
+  <!-- Task: フロントエンド設計 -->
+  <rect x="200" y="120" width="220" height="36" fill="white" stroke="#F3F4F6" stroke-width="1"/>
+  <text x="228" y="142" fill="#4B5563" font-size="11">フロントエンド設計</text>
+  <text x="376" y="142" fill="#6B7280" font-size="11">15</text>
+  <rect x="420" y="120" width="540" height="36" fill="white" stroke="#F3F4F6" stroke-width="0.5"/>
+  <!-- Task Bar -->
+  <rect x="435" y="128" width="120" height="20" rx="4" fill="#3B82F6" opacity="0.9"/>
+  <rect x="435" y="128" width="84" height="20" rx="4" fill="#2563EB"/>
+  <text x="495" y="142" text-anchor="middle" fill="white" font-size="9">70%</text>
+
+  <!-- Task: コンポーネント実装 -->
+  <rect x="200" y="156" width="220" height="36" fill="#F9FAFB" stroke="#F3F4F6" stroke-width="1"/>
+  <text x="228" y="178" fill="#4B5563" font-size="11">コンポーネント実装</text>
+  <text x="376" y="178" fill="#6B7280" font-size="11">30</text>
+  <rect x="420" y="156" width="540" height="36" fill="#F9FAFB" stroke="#F3F4F6" stroke-width="0.5"/>
+  <rect x="530" y="164" width="180" height="20" rx="4" fill="#3B82F6" opacity="0.9"/>
+  <rect x="530" y="164" width="72" height="20" rx="4" fill="#2563EB"/>
+  <text x="620" y="178" text-anchor="middle" fill="white" font-size="9">40%</text>
+
+  <!-- Member Group 2: 佐藤 -->
+  <rect x="200" y="192" width="220" height="32" fill="#ECFDF5" stroke="#E5E7EB" stroke-width="1"/>
+  <circle cx="224" cy="208" r="10" fill="#10B981"/>
+  <text x="224" y="212" text-anchor="middle" fill="white" font-size="8" font-weight="bold">佐</text>
+  <text x="242" y="212" fill="#1F2937" font-size="12" font-weight="bold">佐藤 花子</text>
+  <rect x="420" y="192" width="540" height="32" fill="#ECFDF5" stroke="#E5E7EB" stroke-width="0.5"/>
+
+  <!-- Task: UIデザイン -->
+  <rect x="200" y="224" width="220" height="36" fill="white" stroke="#F3F4F6" stroke-width="1"/>
+  <text x="228" y="246" fill="#4B5563" font-size="11">UIデザイン</text>
+  <text x="376" y="246" fill="#6B7280" font-size="11">20</text>
+  <rect x="420" y="224" width="540" height="36" fill="white" stroke="#F3F4F6" stroke-width="0.5"/>
+  <rect x="440" y="232" width="150" height="20" rx="4" fill="#10B981" opacity="0.9"/>
+  <rect x="440" y="232" width="135" height="20" rx="4" fill="#059669"/>
+  <text x="515" y="246" text-anchor="middle" fill="white" font-size="9">90%</text>
+
+  <!-- Task: アイコン制作 -->
+  <rect x="200" y="260" width="220" height="36" fill="#F9FAFB" stroke="#F3F4F6" stroke-width="1"/>
+  <text x="228" y="282" fill="#4B5563" font-size="11">アイコン・素材制作</text>
+  <text x="376" y="282" fill="#6B7280" font-size="11">10</text>
+  <rect x="420" y="260" width="540" height="36" fill="#F9FAFB" stroke="#F3F4F6" stroke-width="0.5"/>
+  <rect x="580" y="268" width="90" height="20" rx="4" fill="#10B981" opacity="0.9"/>
+  <rect x="580" y="268" width="27" height="20" rx="4" fill="#059669"/>
+  <text x="625" y="282" text-anchor="middle" fill="white" font-size="9">30%</text>
+
+  <!-- Member Group 3: 鈴木 -->
+  <rect x="200" y="296" width="220" height="32" fill="#FFF7ED" stroke="#E5E7EB" stroke-width="1"/>
+  <circle cx="224" cy="312" r="10" fill="#F59E0B"/>
+  <text x="224" y="316" text-anchor="middle" fill="white" font-size="8" font-weight="bold">鈴</text>
+  <text x="242" y="316" fill="#1F2937" font-size="12" font-weight="bold">鈴木 一郎</text>
+  <rect x="420" y="296" width="540" height="32" fill="#FFF7ED" stroke="#E5E7EB" stroke-width="0.5"/>
+
+  <!-- Task: API開発 -->
+  <rect x="200" y="328" width="220" height="36" fill="white" stroke="#F3F4F6" stroke-width="1"/>
+  <text x="228" y="350" fill="#4B5563" font-size="11">バックエンドAPI開発</text>
+  <text x="376" y="350" fill="#6B7280" font-size="11">25</text>
+  <rect x="420" y="328" width="540" height="36" fill="white" stroke="#F3F4F6" stroke-width="0.5"/>
+  <rect x="500" y="336" width="200" height="20" rx="4" fill="#F59E0B" opacity="0.9"/>
+  <rect x="500" y="336" width="120" height="20" rx="4" fill="#D97706"/>
+  <text x="600" y="350" text-anchor="middle" fill="white" font-size="9">60%</text>
+
+  <!-- Task: DB設計 -->
+  <rect x="200" y="364" width="220" height="36" fill="#F9FAFB" stroke="#F3F4F6" stroke-width="1"/>
+  <text x="228" y="386" fill="#4B5563" font-size="11">データベース設計</text>
+  <text x="376" y="386" fill="#6B7280" font-size="11">10</text>
+  <rect x="420" y="364" width="540" height="36" fill="#F9FAFB" stroke="#F3F4F6" stroke-width="0.5"/>
+  <rect x="435" y="372" width="80" height="20" rx="4" fill="#F59E0B" opacity="0.9"/>
+  <rect x="435" y="372" width="80" height="20" rx="4" fill="#D97706"/>
+  <text x="475" y="386" text-anchor="middle" fill="white" font-size="9">100%</text>
+
+  <!-- Member Group 4: 高橋 -->
+  <rect x="200" y="400" width="220" height="32" fill="#F5F3FF" stroke="#E5E7EB" stroke-width="1"/>
+  <circle cx="224" cy="416" r="10" fill="#8B5CF6"/>
+  <text x="224" y="420" text-anchor="middle" fill="white" font-size="8" font-weight="bold">高</text>
+  <text x="242" y="420" fill="#1F2937" font-size="12" font-weight="bold">高橋 美咲</text>
+  <rect x="420" y="400" width="540" height="32" fill="#F5F3FF" stroke="#E5E7EB" stroke-width="0.5"/>
+
+  <!-- Task: 要件定義 -->
+  <rect x="200" y="432" width="220" height="36" fill="white" stroke="#F3F4F6" stroke-width="1"/>
+  <text x="228" y="454" fill="#4B5563" font-size="11">要件定義・PM</text>
+  <text x="376" y="454" fill="#6B7280" font-size="11">40</text>
+  <rect x="420" y="432" width="540" height="36" fill="white" stroke="#F3F4F6" stroke-width="0.5"/>
+  <rect x="435" y="440" width="340" height="20" rx="4" fill="#8B5CF6" opacity="0.9"/>
+  <rect x="435" y="440" width="238" height="20" rx="4" fill="#7C3AED"/>
+  <text x="605" y="454" text-anchor="middle" fill="white" font-size="9">70%</text>
+
+  <!-- Legend -->
+  <rect x="200" y="480" width="760" height="50" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="224" y="510" fill="#6B7280" font-size="10">凡例:</text>
+  <rect x="260" y="500" width="30" height="12" rx="3" fill="#2563EB"/>
+  <text x="296" y="510" fill="#6B7280" font-size="10">完了部分</text>
+  <rect x="360" y="500" width="30" height="12" rx="3" fill="#93C5FD" opacity="0.7"/>
+  <text x="396" y="510" fill="#6B7280" font-size="10">残り部分</text>
+  <line x1="470" y1="494" x2="470" y2="518" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <text x="480" y="510" fill="#6B7280" font-size="10">今日</text>
+  <text x="540" y="510" fill="#6B7280" font-size="10">※ タスクバーをD&amp;Dで移動・並び替え可能</text>
+
+  <!-- Caption -->
+  <rect x="0" y="530" width="960" height="30" fill="#1F2937" opacity="0.9"/>
+  <text x="480" y="550" text-anchor="middle" fill="white" font-size="12">図 6.6: ガントチャート — メンバー別グルーピング + D&amp;D対応タスクバー</text>
+</svg>

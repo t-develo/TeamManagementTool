@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" font-family="Arial, sans-serif">
+  <rect width="960" height="640" fill="#F3F4F6"/>
+
+  <!-- Sidebar -->
+  <rect x="0" y="0" width="200" height="640" fill="#1E293B"/>
+  <text x="28" y="40" fill="white" font-size="18" font-weight="bold">📊 TeamBoard</text>
+  <rect x="0" y="60" width="200" height="1" fill="#334155"/>
+  <!-- Nav Items -->
+  <rect x="8" y="76" width="184" height="36" rx="6" fill="#3B82F6" opacity="0.9"/>
+  <text x="44" y="100" fill="white" font-size="13">📋 ダッシュボード</text>
+  <text x="44" y="136" fill="#94A3B8" font-size="13">👥 メンバー</text>
+  <text x="44" y="168" fill="#94A3B8" font-size="13">📁 プロジェクト</text>
+  <text x="44" y="200" fill="#94A3B8" font-size="13">📅 ガントチャート</text>
+  <text x="44" y="232" fill="#94A3B8" font-size="13">💰 予算管理</text>
+
+  <!-- Header -->
+  <rect x="200" y="0" width="760" height="56" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="224" y="35" fill="#1F2937" font-size="18" font-weight="bold">ダッシュボード</text>
+  <circle cx="900" cy="28" r="16" fill="#E5E7EB"/>
+  <text x="900" y="33" text-anchor="middle" fill="#6B7280" font-size="11">TY</text>
+
+  <!-- KPI Cards Row -->
+  <!-- Card 1: Total Projects -->
+  <rect x="216" y="72" width="170" height="90" rx="10" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="232" y="96" fill="#6B7280" font-size="11">総プロジェクト数</text>
+  <text x="232" y="130" fill="#1F2937" font-size="28" font-weight="bold">12</text>
+  <text x="232" y="148" fill="#10B981" font-size="11">+2 先月比</text>
+
+  <!-- Card 2: Active Projects -->
+  <rect x="398" y="72" width="170" height="90" rx="10" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="414" y="96" fill="#6B7280" font-size="11">進行中</text>
+  <text x="414" y="130" fill="#3B82F6" font-size="28" font-weight="bold">7</text>
+  <rect x="414" y="140" width="80" height="6" rx="3" fill="#E5E7EB"/>
+  <rect x="414" y="140" width="47" height="6" rx="3" fill="#3B82F6"/>
+
+  <!-- Card 3: Total Members -->
+  <rect x="580" y="72" width="170" height="90" rx="10" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="596" y="96" fill="#6B7280" font-size="11">総メンバー数</text>
+  <text x="596" y="130" fill="#1F2937" font-size="28" font-weight="bold">24</text>
+  <text x="596" y="148" fill="#6B7280" font-size="11">稼働中: 20名</text>
+
+  <!-- Card 4: Budget Rate -->
+  <rect x="762" y="72" width="170" height="90" rx="10" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="778" y="96" fill="#6B7280" font-size="11">今月予算消化率</text>
+  <text x="778" y="130" fill="#F59E0B" font-size="28" font-weight="bold">68%</text>
+  <rect x="778" y="140" width="120" height="6" rx="3" fill="#E5E7EB"/>
+  <rect x="778" y="140" width="82" height="6" rx="3" fill="#F59E0B"/>
+
+  <!-- Project Progress Section -->
+  <rect x="216" y="180" width="480" height="440" rx="10" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="236" y="212" fill="#1F2937" font-size="15" font-weight="bold">プロジェクト進捗</text>
+
+  <!-- Project Row 1 -->
+  <text x="236" y="248" fill="#1F2937" font-size="13" font-weight="600">ECサイトリニューアル</text>
+  <rect x="236" y="256" width="440" height="8" rx="4" fill="#E5E7EB"/>
+  <rect x="236" y="256" width="308" height="8" rx="4" fill="#3B82F6"/>
+  <text x="656" y="268" text-anchor="end" fill="#6B7280" font-size="11">70%</text>
+
+  <!-- Project Row 2 -->
+  <text x="236" y="300" fill="#1F2937" font-size="13" font-weight="600">モバイルアプリ開発</text>
+  <rect x="236" y="308" width="440" height="8" rx="4" fill="#E5E7EB"/>
+  <rect x="236" y="308" width="198" height="8" rx="4" fill="#10B981"/>
+  <text x="656" y="320" text-anchor="end" fill="#6B7280" font-size="11">45%</text>
+
+  <!-- Project Row 3 -->
+  <text x="236" y="352" fill="#1F2937" font-size="13" font-weight="600">社内ポータル構築</text>
+  <rect x="236" y="360" width="440" height="8" rx="4" fill="#E5E7EB"/>
+  <rect x="236" y="360" width="396" height="8" rx="4" fill="#10B981"/>
+  <text x="656" y="372" text-anchor="end" fill="#6B7280" font-size="11">90%</text>
+
+  <!-- Project Row 4 -->
+  <text x="236" y="404" fill="#1F2937" font-size="13" font-weight="600">データ基盤移行</text>
+  <rect x="236" y="412" width="440" height="8" rx="4" fill="#E5E7EB"/>
+  <rect x="236" y="412" width="110" height="8" rx="4" fill="#F59E0B"/>
+  <text x="656" y="424" text-anchor="end" fill="#6B7280" font-size="11">25%</text>
+
+  <!-- Project Row 5 -->
+  <text x="236" y="456" fill="#1F2937" font-size="13" font-weight="600">API基盤刷新</text>
+  <rect x="236" y="464" width="440" height="8" rx="4" fill="#E5E7EB"/>
+  <rect x="236" y="464" width="264" height="8" rx="4" fill="#3B82F6"/>
+  <text x="656" y="476" text-anchor="end" fill="#6B7280" font-size="11">60%</text>
+
+  <!-- Recent Activity Section -->
+  <rect x="710" y="180" width="226" height="440" rx="10" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="726" y="212" fill="#1F2937" font-size="15" font-weight="bold">最近の更新</text>
+  <circle cx="738" cy="242" r="6" fill="#3B82F6"/>
+  <text x="752" y="240" fill="#1F2937" font-size="11">田中 - タスク完了</text>
+  <text x="752" y="254" fill="#9CA3AF" font-size="10">2分前</text>
+  <circle cx="738" cy="280" r="6" fill="#10B981"/>
+  <text x="752" y="278" fill="#1F2937" font-size="11">佐藤 - 進捗更新</text>
+  <text x="752" y="292" fill="#9CA3AF" font-size="10">15分前</text>
+  <circle cx="738" cy="318" r="6" fill="#F59E0B"/>
+  <text x="752" y="316" fill="#1F2937" font-size="11">新PJ作成</text>
+  <text x="752" y="330" fill="#9CA3AF" font-size="10">1時間前</text>
+
+  <!-- Caption -->
+  <rect x="0" y="610" width="960" height="30" fill="#1F2937" opacity="0.9"/>
+  <text x="480" y="630" text-anchor="middle" fill="white" font-size="12">図 6.3: ダッシュボード — KPIカード + プロジェクト進捗 + 最近の更新</text>
+</svg>
