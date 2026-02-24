@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 580" font-family="Arial, sans-serif">
+  <rect width="960" height="580" fill="#F3F4F6"/>
+
+  <!-- Sidebar -->
+  <rect x="0" y="0" width="200" height="580" fill="#1E293B"/>
+  <text x="28" y="40" fill="white" font-size="18" font-weight="bold">📊 TeamBoard</text>
+  <rect x="0" y="60" width="200" height="1" fill="#334155"/>
+  <text x="44" y="100" fill="#94A3B8" font-size="13">📋 ダッシュボード</text>
+  <rect x="8" y="108" width="184" height="36" rx="6" fill="#3B82F6" opacity="0.9"/>
+  <text x="44" y="132" fill="white" font-size="13">👥 メンバー</text>
+  <text x="44" y="168" fill="#94A3B8" font-size="13">📁 プロジェクト</text>
+  <text x="44" y="200" fill="#94A3B8" font-size="13">📅 ガントチャート</text>
+  <text x="44" y="232" fill="#94A3B8" font-size="13">💰 予算管理</text>
+
+  <!-- Header -->
+  <rect x="200" y="0" width="760" height="56" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="224" y="35" fill="#1F2937" font-size="18" font-weight="bold">メンバー管理</text>
+  <!-- Add Member Button -->
+  <rect x="810" y="14" width="120" height="32" rx="6" fill="#3B82F6"/>
+  <text x="870" y="35" text-anchor="middle" fill="white" font-size="12" font-weight="bold">+ 新規メンバー</text>
+
+  <!-- Search Bar -->
+  <rect x="216" y="68" width="300" height="36" rx="6" fill="white" stroke="#D1D5DB" stroke-width="1"/>
+  <text x="232" y="91" fill="#9CA3AF" font-size="12">🔍 メンバーを検索...</text>
+
+  <!-- Table Header -->
+  <rect x="216" y="120" width="720" height="36" rx="0" fill="#F9FAFB"/>
+  <text x="240" y="143" fill="#6B7280" font-size="11" font-weight="bold">名前</text>
+  <text x="380" y="143" fill="#6B7280" font-size="11" font-weight="bold">部署</text>
+  <text x="490" y="143" fill="#6B7280" font-size="11" font-weight="bold">役割</text>
+  <text x="590" y="143" fill="#6B7280" font-size="11" font-weight="bold">コスト(万円/月)</text>
+  <text x="720" y="143" fill="#6B7280" font-size="11" font-weight="bold">稼働率</text>
+  <text x="870" y="143" fill="#6B7280" font-size="11" font-weight="bold">操作</text>
+
+  <!-- Table Row 1 -->
+  <rect x="216" y="156" width="720" height="52" fill="white" stroke="#F3F4F6" stroke-width="1"/>
+  <circle cx="248" cy="182" r="16" fill="#3B82F6"/>
+  <text x="248" y="187" text-anchor="middle" fill="white" font-size="11" font-weight="bold">田</text>
+  <text x="272" y="178" fill="#1F2937" font-size="13" font-weight="600">田中 太郎</text>
+  <text x="272" y="194" fill="#9CA3AF" font-size="10">tanaka@example.com</text>
+  <text x="380" y="186" fill="#4B5563" font-size="12">開発部</text>
+  <text x="490" y="186" fill="#4B5563" font-size="12">シニアエンジニア</text>
+  <text x="590" y="186" fill="#1F2937" font-size="13" font-weight="600">80</text>
+  <rect x="720" y="178" width="100" height="8" rx="4" fill="#E5E7EB"/>
+  <rect x="720" y="178" width="85" height="8" rx="4" fill="#3B82F6"/>
+  <text x="828" y="186" fill="#6B7280" font-size="11">85%</text>
+  <text x="878" y="186" fill="#3B82F6" font-size="12">✏️ 🗑️</text>
+
+  <!-- Table Row 2 -->
+  <rect x="216" y="208" width="720" height="52" fill="#F9FAFB" stroke="#F3F4F6" stroke-width="1"/>
+  <circle cx="248" cy="234" r="16" fill="#10B981"/>
+  <text x="248" y="239" text-anchor="middle" fill="white" font-size="11" font-weight="bold">佐</text>
+  <text x="272" y="230" fill="#1F2937" font-size="13" font-weight="600">佐藤 花子</text>
+  <text x="272" y="246" fill="#9CA3AF" font-size="10">sato@example.com</text>
+  <text x="380" y="238" fill="#4B5563" font-size="12">デザイン部</text>
+  <text x="490" y="238" fill="#4B5563" font-size="12">UIデザイナー</text>
+  <text x="590" y="238" fill="#1F2937" font-size="13" font-weight="600">70</text>
+  <rect x="720" y="230" width="100" height="8" rx="4" fill="#E5E7EB"/>
+  <rect x="720" y="230" width="60" height="8" rx="4" fill="#10B981"/>
+  <text x="828" y="238" fill="#6B7280" font-size="11">60%</text>
+  <text x="878" y="238" fill="#3B82F6" font-size="12">✏️ 🗑️</text>
+
+  <!-- Table Row 3 -->
+  <rect x="216" y="260" width="720" height="52" fill="white" stroke="#F3F4F6" stroke-width="1"/>
+  <circle cx="248" cy="286" r="16" fill="#F59E0B"/>
+  <text x="248" y="291" text-anchor="middle" fill="white" font-size="11" font-weight="bold">鈴</text>
+  <text x="272" y="282" fill="#1F2937" font-size="13" font-weight="600">鈴木 一郎</text>
+  <text x="272" y="298" fill="#9CA3AF" font-size="10">suzuki@example.com</text>
+  <text x="380" y="290" fill="#4B5563" font-size="12">開発部</text>
+  <text x="490" y="290" fill="#4B5563" font-size="12">バックエンドエンジニア</text>
+  <text x="590" y="290" fill="#1F2937" font-size="13" font-weight="600">75</text>
+  <rect x="720" y="282" width="100" height="8" rx="4" fill="#E5E7EB"/>
+  <rect x="720" y="282" width="95" height="8" rx="4" fill="#EF4444"/>
+  <text x="828" y="290" fill="#EF4444" font-size="11">95%</text>
+  <text x="878" y="290" fill="#3B82F6" font-size="12">✏️ 🗑️</text>
+
+  <!-- Table Row 4 -->
+  <rect x="216" y="312" width="720" height="52" fill="#F9FAFB" stroke="#F3F4F6" stroke-width="1"/>
+  <circle cx="248" cy="338" r="16" fill="#8B5CF6"/>
+  <text x="248" y="343" text-anchor="middle" fill="white" font-size="11" font-weight="bold">高</text>
+  <text x="272" y="334" fill="#1F2937" font-size="13" font-weight="600">高橋 美咲</text>
+  <text x="272" y="350" fill="#9CA3AF" font-size="10">takahashi@example.com</text>
+  <text x="380" y="342" fill="#4B5563" font-size="12">企画部</text>
+  <text x="490" y="342" fill="#4B5563" font-size="12">プロジェクトマネージャー</text>
+  <text x="590" y="342" fill="#1F2937" font-size="13" font-weight="600">90</text>
+  <rect x="720" y="334" width="100" height="8" rx="4" fill="#E5E7EB"/>
+  <rect x="720" y="334" width="70" height="8" rx="4" fill="#F59E0B"/>
+  <text x="828" y="342" fill="#6B7280" font-size="11">70%</text>
+  <text x="878" y="342" fill="#3B82F6" font-size="12">✏️ 🗑️</text>
+
+  <!-- Table Row 5 -->
+  <rect x="216" y="364" width="720" height="52" fill="white" stroke="#F3F4F6" stroke-width="1"/>
+  <circle cx="248" cy="390" r="16" fill="#EC4899"/>
+  <text x="248" y="395" text-anchor="middle" fill="white" font-size="11" font-weight="bold">山</text>
+  <text x="272" y="386" fill="#1F2937" font-size="13" font-weight="600">山田 健二</text>
+  <text x="272" y="402" fill="#9CA3AF" font-size="10">yamada@example.com</text>
+  <text x="380" y="394" fill="#4B5563" font-size="12">開発部</text>
+  <text x="490" y="394" fill="#4B5563" font-size="12">フロントエンドエンジニア</text>
+  <text x="590" y="394" fill="#1F2937" font-size="13" font-weight="600">65</text>
+  <rect x="720" y="386" width="100" height="8" rx="4" fill="#E5E7EB"/>
+  <rect x="720" y="386" width="45" height="8" rx="4" fill="#10B981"/>
+  <text x="828" y="394" fill="#6B7280" font-size="11">45%</text>
+  <text x="878" y="394" fill="#3B82F6" font-size="12">✏️ 🗑️</text>
+
+  <!-- Pagination -->
+  <text x="580" y="450" text-anchor="middle" fill="#6B7280" font-size="12">1 / 3 ページ</text>
+  <rect x="516" y="458" width="28" height="24" rx="4" fill="white" stroke="#D1D5DB" stroke-width="1"/>
+  <text x="530" y="475" text-anchor="middle" fill="#6B7280" font-size="11">&lt;</text>
+  <rect x="550" y="458" width="28" height="24" rx="4" fill="#3B82F6"/>
+  <text x="564" y="475" text-anchor="middle" fill="white" font-size="11">1</text>
+  <rect x="584" y="458" width="28" height="24" rx="4" fill="white" stroke="#D1D5DB" stroke-width="1"/>
+  <text x="598" y="475" text-anchor="middle" fill="#6B7280" font-size="11">2</text>
+  <rect x="618" y="458" width="28" height="24" rx="4" fill="white" stroke="#D1D5DB" stroke-width="1"/>
+  <text x="632" y="475" text-anchor="middle" fill="#6B7280" font-size="11">&gt;</text>
+
+  <!-- Caption -->
+  <rect x="0" y="550" width="960" height="30" fill="#1F2937" opacity="0.9"/>
+  <text x="480" y="570" text-anchor="middle" fill="white" font-size="12">図 6.4: メンバー一覧 — テーブル表示（コスト・稼働率バー付き）</text>
+</svg>

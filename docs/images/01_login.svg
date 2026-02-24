@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" font-family="Arial, sans-serif">
+  <!-- Background -->
+  <rect width="960" height="600" fill="#F3F4F6"/>
+
+  <!-- Left Panel - Brand -->
+  <defs>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E3A8A"/>
+      <stop offset="100%" style="stop-color:#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="480" height="600" fill="url(#brandGrad)"/>
+  <!-- Brand Icon -->
+  <circle cx="240" cy="230" r="50" fill="rgba(255,255,255,0.15)"/>
+  <rect x="218" y="210" width="18" height="40" rx="3" fill="white"/>
+  <rect x="244" y="220" width="18" height="30" rx="3" fill="white"/>
+  <text x="240" y="320" text-anchor="middle" fill="white" font-size="32" font-weight="bold">TeamBoard</text>
+  <text x="240" y="352" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="14">Team &amp; Project Cost Management</text>
+  <text x="240" y="376" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="12">チーム・プロジェクト・コストを一元管理</text>
+
+  <!-- Right Panel - Login Form -->
+  <rect x="480" y="0" width="480" height="600" fill="white"/>
+  <text x="720" y="200" text-anchor="middle" fill="#1F2937" font-size="24" font-weight="bold">ログイン</text>
+  <text x="720" y="228" text-anchor="middle" fill="#6B7280" font-size="13">アカウント情報を入力してください</text>
+
+  <!-- Email Field -->
+  <text x="570" y="274" fill="#374151" font-size="13" font-weight="600">メールアドレス</text>
+  <rect x="570" y="282" width="300" height="42" rx="6" fill="white" stroke="#D1D5DB" stroke-width="1.5"/>
+  <text x="586" y="308" fill="#9CA3AF" font-size="13">example@company.com</text>
+
+  <!-- Password Field -->
+  <text x="570" y="350" fill="#374151" font-size="13" font-weight="600">パスワード</text>
+  <rect x="570" y="358" width="300" height="42" rx="6" fill="white" stroke="#D1D5DB" stroke-width="1.5"/>
+  <text x="586" y="384" fill="#9CA3AF" font-size="13">••••••••</text>
+
+  <!-- Login Button -->
+  <rect x="570" y="424" width="300" height="44" rx="8" fill="#3B82F6"/>
+  <text x="720" y="452" text-anchor="middle" fill="white" font-size="15" font-weight="bold">ログイン</text>
+
+  <!-- Caption -->
+  <rect x="0" y="570" width="960" height="30" fill="#1F2937" opacity="0.9"/>
+  <text x="480" y="590" text-anchor="middle" fill="white" font-size="12">図 6.2: ログイン画面 — 2カラムレイアウト（ブランド + ログインフォーム）</text>
+</svg>
