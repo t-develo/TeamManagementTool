@@ -5,6 +5,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 
 from app.auth.jwt_handler import decode_access_token
+from app.config import settings
 from app.models.user import User
 
 security = HTTPBearer()
@@ -25,6 +26,12 @@ async def get_current_user(
     user = await User.get(user_id)
     if user is None or not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive")
+
+    if settings.ALLOWED_EMAILS:
+        allowed = [e.strip() for e in settings.ALLOWED_EMAILS.split(",") if e.strip()]
+        if user.email not in allowed:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+
     return user
 
 
