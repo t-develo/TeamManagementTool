@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from mangum import Mangum
 
 from app.config import settings
 from app.db.database import init_db
@@ -34,3 +35,6 @@ app.include_router(dashboard.router)
 @app.get("/api/health")
 async def health():
     return {"status": "ok"}
+
+
+handler = Mangum(app)
