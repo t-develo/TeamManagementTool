@@ -6,9 +6,10 @@ import { BudgetGauge } from "./BudgetGauge";
 interface ProjectCardProps {
   project: Project;
   onClick: (project: Project) => void;
+  onEdit?: (e: React.MouseEvent, project: Project) => void;
 }
 
-export function ProjectCard({ project, onClick }: ProjectCardProps) {
+export function ProjectCard({ project, onClick, onEdit }: ProjectCardProps) {
   const uniqueAssignees = [...new Set(project.tasks.map((t) => t.assignee_id))];
 
   return (
@@ -18,7 +19,17 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
     >
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-lg font-semibold text-gray-800 truncate">{project.name}</h3>
-        <StatusBadge status={project.status} statusMap={PROJECT_STATUS_MAP} />
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <StatusBadge status={project.status} statusMap={PROJECT_STATUS_MAP} />
+          {onEdit && (
+            <button
+              onClick={(e) => onEdit(e, project)}
+              className="px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded hover:bg-gray-200"
+            >
+              編集
+            </button>
+          )}
+        </div>
       </div>
       <p className="text-sm text-gray-500 mb-3">
         {project.start_date} ~ {project.end_date}

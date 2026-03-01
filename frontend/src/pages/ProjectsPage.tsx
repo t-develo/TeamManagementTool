@@ -9,16 +9,30 @@ export function ProjectsPage() {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | "">("");
   const [showForm, setShowForm] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   const { data, isLoading } = useProjectList({
     status: statusFilter || undefined,
   });
-  const { createMutation } = useProjectMutations();
+  const { createMutation, updateMutation } = useProjectMutations();
 
   const handleCreate = (formData: ProjectCreate | ProjectUpdate) => {
     createMutation.mutate(formData as ProjectCreate, {
       onSuccess: () => setShowForm(false),
     });
+  };
+
+  const handleUpdate = (formData: ProjectCreate | ProjectUpdate) => {
+    if (!editingProject) return;
+    updateMutation.mutate(
+      { id: editingProject.id, data: formData as ProjectUpdate },
+      { onSuccess: () => setEditingProject(null) }
+    );
+  };
+
+  const handleEditClick = (e: React.MouseEvent, project: Project) => {
+    e.stopPropagation();
+    setEditingProject(project);
   };
 
   const handleClick = (project: Project) => {
@@ -62,7 +76,12 @@ export function ProjectsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {data?.items.map((project) => (
-            <ProjectCard key={project.id} project={project} onClick={handleClick} />
+            <ProjectCard
+              key={project.id}
+              project={project}
+              onClick={handleClick}
+              onEdit={handleEditClick}
+            />
           ))}
         </div>
       )}
@@ -73,6 +92,15 @@ export function ProjectsPage() {
           onSubmit={handleCreate}
           onCancel={() => setShowForm(false)}
           isSubmitting={createMutation.isPending}
+        />
+      )}
+
+      {editingProject && (
+        <ProjectForm
+          initialData={editingProject}
+          onSubmit={handleUpdate}
+          onCancel={() => setEditingProject(null)}
+          isSubmitting={updateMutation.isPending}
         />
       )}
     </div>

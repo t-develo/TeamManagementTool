@@ -1,16 +1,25 @@
 import { useLocation, Link } from "react-router-dom";
 import { useUiStore } from "../../stores/uiStore";
+import { useAuthStore } from "../../stores/authStore";
 
-const navItems = [
+const baseNavItems = [
   { path: "/dashboard", label: "ダッシュボード", icon: "📊" },
   { path: "/members", label: "メンバー", icon: "👥" },
   { path: "/projects", label: "プロジェクト", icon: "📁" },
   { path: "/budget", label: "予算", icon: "💰" },
 ];
 
+const adminNavItems = [
+  { path: "/users", label: "ユーザー管理", icon: "🔑" },
+];
+
 export function Sidebar() {
   const location = useLocation();
   const { sidebarCollapsed, toggleSidebar } = useUiStore();
+  const user = useAuthStore((state) => state.user);
+  const navItems = user?.role === "admin"
+    ? [...baseNavItems, ...adminNavItems]
+    : baseNavItems;
 
   return (
     <aside
