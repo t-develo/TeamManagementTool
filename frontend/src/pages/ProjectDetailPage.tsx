@@ -1,27 +1,45 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useProject } from "../hooks/useProjects";
+import { useProject, useProjectMutations } from "../hooks/useProjects";
 import { useMemberList } from "../hooks/useMembers";
 import { useTaskMutations } from "../hooks/useTasks";
 import { GanttChart } from "../components/gantt/GanttChart";
+import { ProjectForm } from "../components/projects/ProjectForm";
 import { StatusBadge, PROJECT_STATUS_MAP, TASK_STATUS_MAP } from "../components/common/StatusBadge";
 import { ProgressBar } from "../components/common/ProgressBar";
 import { BudgetGauge } from "../components/projects/BudgetGauge";
-import type { TaskCreate } from "../types/task";
+import type { TaskCreate, TaskUpdate } from "../types/task";
+import type { ProjectCreate, ProjectUpdate } from "../types/project";
+import type { Task } from "../types/task";
 
 export function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: project, isLoading } = useProject(id!);
   const { data: membersData } = useMemberList({ per_page: 100 });
-  const { createMutation, deleteMutation } = useTaskMutations(id!);
+  const { createMutation, updateMutation: updateTaskMutation, deleteMutation } = useTaskMutations(id!);
+  const { updateMutation: updateProjectMutation } = useProjectMutations();
 
+  // タスク作成フォームのstate
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [taskTitle, setTaskTitle] = useState("");
   const [taskAssignee, setTaskAssignee] = useState("");
   const [taskManDays, setTaskManDays] = useState(5);
   const [taskStartDate, setTaskStartDate] = useState("");
   const [taskEndDate, setTaskEndDate] = useState("");
+
+  // タスク編集フォームのstate
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editAssignee, setEditAssignee] = useState("");
+  const [editManDays, setEditManDays] = useState(0);
+  const [editProgress, setEditProgress] = useState(0);
+  const [editStatus, setEditStatus] = useState<Task["status"]>("not_started");
+  const [editStartDate, setEditStartDate] = useState("");
+  const [editEndDate, setEditEndDate] = useState("");
+
+  // プロジェクト編集フォームのstate
+  const [showProjectForm, setShowProjectForm] = useState(false);
 
   if (isLoading) return <div className="text-gray-500">読み込み中...</div>;
   if (!project) return <div className="text-gray-500">プロジェクトが見つかりません</div>;
@@ -53,6 +71,44 @@ export function ProjectDetailPage() {
     );
   };
 
+  const openEditTask = (task: Task) => {
+    setEditingTask(task);
+    setEditTitle(task.title);
+    setEditAssignee(task.assignee_id);
+    setEditManDays(task.man_days);
+    setEditProgress(task.progress);
+    setEditStatus(task.status);
+    setEditStartDate(task.start_date);
+    setEditEndDate(task.end_date);
+  };
+
+  const handleUpdateTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTask) return;
+    updateTaskMutation.mutate(
+      {
+        taskId: editingTask.task_id,
+        data: {
+          title: editTitle,
+          assignee_id: editAssignee,
+          man_days: editManDays,
+          progress: editProgress,
+          status: editStatus,
+          start_date: editStartDate,
+          end_date: editEndDate,
+        } as TaskUpdate,
+      },
+      { onSuccess: () => setEditingTask(null) }
+    );
+  };
+
+  const handleUpdateProject = (formData: ProjectCreate | ProjectUpdate) => {
+    updateProjectMutation.mutate(
+      { id: project.id, data: formData as ProjectUpdate },
+      { onSuccess: () => setShowProjectForm(false) }
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -67,7 +123,15 @@ export function ProjectDetailPage() {
             <h2 className="text-2xl font-bold text-gray-800">{project.name}</h2>
             <p className="text-sm text-gray-500 mt-1">{project.description}</p>
           </div>
-          <StatusBadge status={project.status} statusMap={PROJECT_STATUS_MAP} />
+          <div className="flex items-center gap-3">
+            <StatusBadge status={project.status} statusMap={PROJECT_STATUS_MAP} />
+            <button
+              onClick={() => setShowProjectForm(true)}
+              className="px-3 py-1.5 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+            >
+              編集
+            </button>
+          </div>
         </div>
         <div className="grid grid-cols-4 gap-4">
           <div>
@@ -128,7 +192,13 @@ export function ProjectDetailPage() {
                   <StatusBadge status={task.status} statusMap={TASK_STATUS_MAP} />
                 </td>
                 <td className="px-6 py-3 text-xs text-gray-500">{task.start_date} ~ {task.end_date}</td>
-                <td className="px-6 py-3 text-right">
+                <td className="px-6 py-3 text-right space-x-2">
+                  <button
+                    onClick={() => openEditTask(task)}
+                    className="text-blue-600 hover:text-blue-800 text-sm"
+                  >
+                    編集
+                  </button>
                   <button
                     onClick={() => deleteMutation.mutate(task.task_id)}
                     className="text-red-600 hover:text-red-800 text-sm"
@@ -142,6 +212,7 @@ export function ProjectDetailPage() {
         </table>
       </div>
 
+      {/* タスク追加モーダル */}
       {showTaskForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowTaskForm(false)}>
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg mx-4" onClick={(e) => e.stopPropagation()}>
@@ -189,6 +260,82 @@ export function ProjectDetailPage() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* タスク編集モーダル */}
+      {editingTask && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setEditingTask(null)}>
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">タスク編集</h3>
+            <form onSubmit={handleUpdateTask} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">タスク名</label>
+                <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">担当者</label>
+                <select value={editAssignee} onChange={(e) => setEditAssignee(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required>
+                  <option value="">選択してください</option>
+                  {members.map((m) => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">工数 (人日)</label>
+                  <input type="number" step="0.5" value={editManDays} onChange={(e) => setEditManDays(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">進捗 (%)</label>
+                  <input type="number" min="0" max="100" value={editProgress} onChange={(e) => setEditProgress(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">ステータス</label>
+                <select value={editStatus} onChange={(e) => setEditStatus(e.target.value as Task["status"])}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                  <option value="not_started">未着手</option>
+                  <option value="in_progress">進行中</option>
+                  <option value="completed">完了</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">開始日</label>
+                  <input type="date" value={editStartDate} onChange={(e) => setEditStartDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">終了日</label>
+                  <input type="date" value={editEndDate} onChange={(e) => setEditEndDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <button type="button" onClick={() => setEditingTask(null)} className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">キャンセル</button>
+                <button type="submit" disabled={updateTaskMutation.isPending}
+                  className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                  {updateTaskMutation.isPending ? "保存中..." : "保存"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* プロジェクト編集モーダル */}
+      {showProjectForm && (
+        <ProjectForm
+          initialData={project}
+          onSubmit={handleUpdateProject}
+          onCancel={() => setShowProjectForm(false)}
+          isSubmitting={updateProjectMutation.isPending}
+        />
       )}
     </div>
   );

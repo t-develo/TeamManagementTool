@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ProtectedRoute } from "./components/layout/ProtectedRoute";
 import { MainLayout } from "./components/layout/MainLayout";
@@ -8,6 +8,7 @@ import { MembersPage } from "./pages/MembersPage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage";
 import { BudgetPage } from "./pages/BudgetPage";
+import { UsersPage } from "./pages/UsersPage";
 import { useAuthStore } from "./stores/authStore";
 
 const queryClient = new QueryClient({
@@ -25,6 +26,14 @@ function RootRedirect() {
   return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
 }
 
+function AdminRoute() {
+  const user = useAuthStore((state) => state.user);
+  if (user && user.role !== "admin") {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return <Outlet />;
+}
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -39,6 +48,9 @@ export default function App() {
               <Route path="/projects" element={<ProjectsPage />} />
               <Route path="/projects/:id" element={<ProjectDetailPage />} />
               <Route path="/budget" element={<BudgetPage />} />
+              <Route element={<AdminRoute />}>
+                <Route path="/users" element={<UsersPage />} />
+              </Route>
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
