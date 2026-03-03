@@ -27,7 +27,10 @@ export function useAuth() {
   const loginMutation = useMutation({
     mutationFn: (data: LoginRequest) => authApi.login(data),
     onSuccess: async (response) => {
-      const tempUser = { id: "", email: "", name: "", role: "member" as const };
+      const tempUser = {
+        id: "", email: "", name: "", role: "member" as const,
+        is_active: true, created_at: "", updated_at: "",
+      };
       setAuth(response.access_token, tempUser);
       await queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
       navigate("/dashboard");
