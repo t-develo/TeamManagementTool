@@ -222,3 +222,160 @@ git push (main) → GitHub Actions → OIDC → IAM Role
 ```
 
 詳細なアーキテクチャ図は [`docs/images/aws-architecture.svg`](docs/images/aws-architecture.svg) を参照してください。
+
+---
+
+## AWS へのデプロイ手順（CloudFormation）
+
+`infra/cloudformation/teamboard.yaml` を使うと、必要な AWS リソースを **1 コマンド**で一括構築できます。
+
+### 前提条件
+
+| ツール | バージョン | 確認コマンド |
+|--------|-----------|-------------|
+| AWS CLI | v2 以上 | `aws --version` |
+| AWS アカウント | — | マネジメントコンソールにログインできること |
+| MongoDB Atlas クラスター | — | 接続 URL を手元に用意 |
+
+> **AWS CLI の設定がまだの場合**
+> ```bash
+> aws configure
+> # AWS Access Key ID, Secret Access Key, Region (ap-northeast-1) を入力
+> ```
+
+---
+
+### ステップ 1 — JWT シークレットキーを生成する
+
+Lambda 関数が使う JWT 署名キーを事前に生成しておきます。
+
+```bash
+# 32バイト以上のランダム文字列を生成（openssl が使える場合）
+openssl rand -hex 32
+# 出力例: a3f8c2e1d4b5...  ← これを後のコマンドで使用
+```
+
+---
+
+### ステップ 2 — CloudFormation スタックをデプロイする
+
+リポジトリのルートで以下のコマンドを実行してください。
+
+```bash
+aws cloudformation deploy \
+  --template-file infra/cloudformation/teamboard.yaml \
+  --stack-name teamboard \
+  --region ap-northeast-1 \
+  --capabilities CAPABILITY_NAMED_IAM \
+  --parameter-overrides \
+    GitHubOrg="<あなたの GitHub 組織またはユーザー名>" \
+    GitHubRepo="TeamManagementTool" \
+    MongodbUrl="mongodb+srv://<user>:<password>@<cluster>.mongodb.net/" \
+    JwtSecretKey="<ステップ1で生成したキー>"
+```
+
+> **`--capabilities CAPABILITY_NAMED_IAM` が必要な理由**
+> テンプレートが名前付き IAM リソース（ロール名を明示的に指定）を作成するため、
+> CloudFormation への明示的な許可が必要です。
+
+デプロイ完了まで約 **5〜10 分**かかります。進捗は AWS マネジメントコンソールの
+[CloudFormation](https://ap-northeast-1.console.aws.amazon.com/cloudformation) から確認できます。
+
+---
+
+### ステップ 3 — デプロイ結果の値を確認する
+
+スタック作成が完了したら、Outputs に出力された値を確認します。
+
+```bash
+aws cloudformation describe-stacks \
+  --stack-name teamboard \
+  --region ap-northeast-1 \
+  --query "Stacks[0].Outputs" \
+  --output table
+```
+
+以下のような出力が得られます。
+
+```
+----------------------------------------------------------
+|                    OutputKey                           |
++---------------------------+----------------------------+
+| FrontendUrl               | https://xxxx.cloudfront.net|
+| ApiUrl                    | https://xxxx.execute-api.. |
+| S3BucketName              | teamboard-frontend-123456  |
+| CloudFrontDistributionId  | ABCDEF123456               |
+| LambdaFunctionName        | teamboard-api              |
+| GitHubActionsRoleArn      | arn:aws:iam::123456:role/..|
++---------------------------+----------------------------+
+```
+
+---
+
+### ステップ 4 — GitHub Secrets を設定する
+
+GitHub リポジトリの **Settings → Secrets and variables → Actions → New repository secret** から、
+ステップ 3 の Outputs を以下の名前で登録します。
+
+| GitHub Secret 名 | CloudFormation Output | 用途 |
+|------------------|-----------------------|------|
+| `AWS_ROLE_ARN` | `GitHubActionsRoleArn` | OIDC 認証で AssumeRole する IAM ロール |
+| `LAMBDA_FUNCTION_NAME` | `LambdaFunctionName` | バックエンドデプロイ対象の Lambda 関数名 |
+| `S3_BUCKET_NAME` | `S3BucketName` | フロントエンドアセットのアップロード先 |
+| `CLOUDFRONT_DISTRIBUTION_ID` | `CloudFrontDistributionId` | デプロイ後のキャッシュ無効化対象 |
+| `VITE_API_URL` | `ApiUrl` | フロントエンドから API を呼び出すベース URL |
+
+---
+
+### ステップ 5 — 初回アプリケーションデプロイを実行する
+
+GitHub Secrets の登録が完了したら、`main` ブランチに空コミットを push して
+CI/CD パイプラインを起動します。
+
+```bash
+# バックエンドと フロントエンドの両方を強制デプロイ
+git commit --allow-empty -m "chore: trigger initial deploy"
+git push origin main
+```
+
+GitHub の **Actions** タブでパイプラインの完了を確認してください。
+
+---
+
+### ステップ 6 — 動作確認
+
+```bash
+# 1. API ヘルスチェック（<ApiUrl> は Outputs の値に置き換え）
+curl https://<ApiUrl>/api/health
+# → {"status": "ok"} が返れば成功
+
+# 2. フロントエンド URL をブラウザで開く
+# Outputs の FrontendUrl をブラウザに貼り付けてログイン画面が表示されれば完了
+```
+
+初期ログインアカウント:
+
+| メールアドレス | パスワード | ロール |
+|--------------|-----------|--------|
+| `admin@teamboard.example` | `admin1234` | admin |
+| `manager@teamboard.example` | `manager1234` | manager |
+
+---
+
+### スタックの削除（後片付け）
+
+```bash
+# S3 バケットのオブジェクトを先に削除してからスタックを削除する
+aws s3 rm s3://$(aws cloudformation describe-stacks \
+  --stack-name teamboard --region ap-northeast-1 \
+  --query "Stacks[0].Outputs[?OutputKey=='S3BucketName'].OutputValue" \
+  --output text) --recursive
+
+# スタック削除
+aws cloudformation delete-stack \
+  --stack-name teamboard \
+  --region ap-northeast-1
+```
+
+> **注意**: S3 バケットと CloudWatch ログは `DeletionPolicy: Retain` のため、
+> スタック削除後も残ります。不要な場合はマネジメントコンソールから手動で削除してください。
