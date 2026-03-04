@@ -1,0 +1,438 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 855" font-family="Arial, sans-serif">
+
+  <!-- ============================================================ -->
+  <!-- DEFS: Arrow markers, gradients                               -->
+  <!-- ============================================================ -->
+  <defs>
+    <!-- Standard gray arrow marker -->
+    <marker id="arrow" markerWidth="10" markerHeight="7"
+            refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6B7280"/>
+    </marker>
+    <!-- Blue arrow for user flow -->
+    <marker id="arrow-blue" markerWidth="10" markerHeight="7"
+            refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6"/>
+    </marker>
+    <!-- Orange arrow for CI/CD flow -->
+    <marker id="arrow-orange" markerWidth="10" markerHeight="7"
+            refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F59E0B"/>
+    </marker>
+    <!-- Pink arrow for API invocation -->
+    <marker id="arrow-pink" markerWidth="10" markerHeight="7"
+            refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#E7157B"/>
+    </marker>
+    <!-- Red arrow for IAM -->
+    <marker id="arrow-red" markerWidth="10" markerHeight="7"
+            refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#DD344C"/>
+    </marker>
+    <!-- Green arrow for DB -->
+    <marker id="arrow-green" markerWidth="10" markerHeight="7"
+            refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+    </marker>
+    <!-- Purple arrow for zone connection -->
+    <marker id="arrow-purple" markerWidth="10" markerHeight="7"
+            refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#7C3AED"/>
+    </marker>
+  </defs>
+
+  <!-- ============================================================ -->
+  <!-- CANVAS BACKGROUND                                            -->
+  <!-- ============================================================ -->
+  <rect width="1200" height="855" fill="#F3F4F6"/>
+
+  <!-- ============================================================ -->
+  <!-- TITLE BAR                                                    -->
+  <!-- ============================================================ -->
+  <rect x="0" y="0" width="1200" height="50" fill="#1E293B"/>
+  <text x="600" y="33" text-anchor="middle" fill="white"
+        font-size="20" font-weight="bold">TeamBoard — AWS アーキテクチャ構成図</text>
+  <text x="1185" y="33" text-anchor="end" fill="#94A3B8"
+        font-size="11">Region: ap-northeast-1 (Tokyo)</text>
+
+  <!-- ============================================================ -->
+  <!-- LEFT LANE LABELS (rotated vertical text)                     -->
+  <!-- ============================================================ -->
+
+  <!-- Zone 1: Frontend Layer -->
+  <rect x="0" y="55" width="115" height="148" fill="#1E3A8A" opacity="0.85"/>
+  <text transform="translate(57, 130) rotate(-90)"
+        text-anchor="middle" fill="white" font-size="12" font-weight="bold">フロントエンド層</text>
+
+  <!-- Zone 2: Backend Layer -->
+  <rect x="0" y="208" width="115" height="168" fill="#5B21B6" opacity="0.85"/>
+  <text transform="translate(57, 298) rotate(-90)"
+        text-anchor="middle" fill="white" font-size="12" font-weight="bold">バックエンド層</text>
+
+  <!-- Zone 3: Database Layer -->
+  <rect x="0" y="381" width="115" height="118" fill="#065F46" opacity="0.85"/>
+  <text transform="translate(57, 442) rotate(-90)"
+        text-anchor="middle" fill="white" font-size="12" font-weight="bold">データベース層</text>
+
+  <!-- Zone 4: Security / IAM -->
+  <rect x="0" y="504" width="115" height="118" fill="#7F1D1D" opacity="0.85"/>
+  <text transform="translate(57, 565) rotate(-90)"
+        text-anchor="middle" fill="white" font-size="12" font-weight="bold">セキュリティ / IAM</text>
+
+  <!-- Zone 5: CI/CD -->
+  <rect x="0" y="627" width="115" height="168" fill="#1F2937" opacity="0.90"/>
+  <text transform="translate(57, 718) rotate(-90)"
+        text-anchor="middle" fill="white" font-size="12" font-weight="bold">CI/CD フロー</text>
+
+  <!-- ============================================================ -->
+  <!-- ZONE BACKGROUNDS                                             -->
+  <!-- ============================================================ -->
+  <rect x="115" y="55"  width="1085" height="148" fill="#EFF6FF" opacity="0.55"/>
+  <rect x="115" y="208" width="1085" height="168" fill="#F5F3FF" opacity="0.55"/>
+  <rect x="115" y="381" width="1085" height="118" fill="#ECFDF5" opacity="0.55"/>
+  <rect x="115" y="504" width="1085" height="118" fill="#FEF2F2" opacity="0.55"/>
+  <rect x="115" y="627" width="1085" height="168" fill="#FFFBEB" opacity="0.55"/>
+
+  <!-- Zone separator lines -->
+  <line x1="115" y1="203" x2="1200" y2="203" stroke="#D1D5DB" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="115" y1="376" x2="1200" y2="376" stroke="#D1D5DB" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="115" y1="499" x2="1200" y2="499" stroke="#D1D5DB" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="115" y1="622" x2="1200" y2="622" stroke="#D1D5DB" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+  <!-- ============================================================ -->
+  <!-- ZONE 1: FRONTEND LAYER                                       -->
+  <!-- User → CloudFront → S3                                       -->
+  <!-- ============================================================ -->
+
+  <!-- User / Browser box (x=130, y=78, w=130, h=90) -->
+  <rect x="130" y="78" width="140" height="90" rx="10"
+        fill="white" stroke="#3B82F6" stroke-width="2"/>
+  <!-- Browser icon (simplified) -->
+  <rect x="162" y="92" width="76" height="50" rx="4" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>
+  <rect x="162" y="92" width="76" height="13" rx="4" fill="#3B82F6"/>
+  <circle cx="170" cy="98" r="3" fill="white" opacity="0.7"/>
+  <circle cx="179" cy="98" r="3" fill="white" opacity="0.7"/>
+  <circle cx="188" cy="98" r="3" fill="white" opacity="0.7"/>
+  <text x="200" y="155" text-anchor="middle" fill="#1E3A8A"
+        font-size="11" font-weight="bold">ユーザー / ブラウザ</text>
+
+  <!-- Arrow: User → CloudFront -->
+  <line x1="270" y1="123" x2="385" y2="123"
+        stroke="#3B82F6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <text x="327" y="115" text-anchor="middle" fill="#2563EB" font-size="9">HTTPS リクエスト</text>
+
+  <!-- CloudFront box (x=390, y=68, w=175, h=110) -->
+  <rect x="390" y="68" width="175" height="110" rx="10"
+        fill="white" stroke="#8C4FFF" stroke-width="2"/>
+  <!-- Accent bar -->
+  <rect x="390" y="68" width="175" height="5" rx="10" fill="#8C4FFF"/>
+  <!-- Cloud icon (simplified arcs) -->
+  <ellipse cx="452" cy="110" rx="26" ry="17" fill="#F0EAFF" stroke="#8C4FFF" stroke-width="1.5"/>
+  <ellipse cx="475" cy="105" rx="22" ry="15" fill="#F0EAFF" stroke="#8C4FFF" stroke-width="1.5"/>
+  <ellipse cx="494" cy="112" rx="18" ry="14" fill="#F0EAFF" stroke="#8C4FFF" stroke-width="1.5"/>
+  <rect x="426" y="115" width="86" height="12" fill="#F0EAFF"/>
+  <text x="477" y="150" text-anchor="middle" fill="#5B21B6"
+        font-size="12" font-weight="bold">AWS CloudFront</text>
+  <text x="477" y="165" text-anchor="middle" fill="#6B7280" font-size="10">CDN ディストリビューション</text>
+
+  <!-- Arrow: CloudFront → S3 -->
+  <line x1="565" y1="123" x2="700" y2="123"
+        stroke="#3B82F6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <text x="632" y="115" text-anchor="middle" fill="#2563EB" font-size="9">オリジン取得</text>
+
+  <!-- S3 box (x=705, y=68, w=175, h=110) -->
+  <rect x="705" y="68" width="175" height="110" rx="10"
+        fill="white" stroke="#7AA116" stroke-width="2"/>
+  <!-- Accent bar -->
+  <rect x="705" y="68" width="175" height="5" rx="10" fill="#7AA116"/>
+  <!-- S3 bucket icon (simplified) -->
+  <ellipse cx="792" cy="106" rx="28" ry="10" fill="#EEF6E6" stroke="#7AA116" stroke-width="1.5"/>
+  <rect x="764" y="106" width="56" height="28" fill="#EEF6E6" stroke="#7AA116" stroke-width="1.5"/>
+  <ellipse cx="792" cy="134" rx="28" ry="10" fill="#EEF6E6" stroke="#7AA116" stroke-width="1.5"/>
+  <text x="792" y="152" text-anchor="middle" fill="#3A5E0D"
+        font-size="12" font-weight="bold">AWS S3</text>
+  <text x="792" y="167" text-anchor="middle" fill="#6B7280" font-size="10">静的アセット (Vite ビルド)</text>
+
+  <!-- React/TS note tag -->
+  <rect x="705" y="183" width="175" height="18" rx="4"
+        fill="#EEF6E6" stroke="#7AA116" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="792" y="196" text-anchor="middle" fill="#3A5E0D" font-size="9">
+    React 18 + TypeScript + Vite
+  </text>
+
+  <!-- ============================================================ -->
+  <!-- ZONE 2: BACKEND LAYER                                        -->
+  <!-- CloudFront → API Gateway → Lambda                            -->
+  <!-- ============================================================ -->
+
+  <!-- Vertical connection: CloudFront → API Gateway -->
+  <line x1="477" y1="203" x2="477" y2="258"
+        stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="5,3"
+        marker-end="url(#arrow-purple)"/>
+  <text x="495" y="235" fill="#7C3AED" font-size="9">API コール</text>
+
+  <!-- Endpoint URL note -->
+  <rect x="300" y="228" width="95" height="32" rx="4"
+        fill="#FDF2F8" stroke="#E7157B" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="347" y="241" text-anchor="middle" fill="#9D174D" font-size="8">execute-api.</text>
+  <text x="347" y="253" text-anchor="middle" fill="#9D174D" font-size="8">ap-northeast-1.amazonaws.com</text>
+
+  <!-- API Gateway box (x=390, y=220, w=175, h=105) -->
+  <rect x="390" y="220" width="175" height="105" rx="10"
+        fill="white" stroke="#E7157B" stroke-width="2"/>
+  <!-- Accent bar -->
+  <rect x="390" y="220" width="175" height="5" rx="10" fill="#E7157B"/>
+  <!-- API Gateway icon: grid of squares -->
+  <rect x="432" y="240" width="14" height="14" rx="2" fill="#FCE4F0" stroke="#E7157B" stroke-width="1.5"/>
+  <rect x="453" y="240" width="14" height="14" rx="2" fill="#FCE4F0" stroke="#E7157B" stroke-width="1.5"/>
+  <rect x="474" y="240" width="14" height="14" rx="2" fill="#FCE4F0" stroke="#E7157B" stroke-width="1.5"/>
+  <rect x="432" y="260" width="14" height="14" rx="2" fill="#E7157B"/>
+  <rect x="453" y="260" width="14" height="14" rx="2" fill="#FCE4F0" stroke="#E7157B" stroke-width="1.5"/>
+  <rect x="474" y="260" width="14" height="14" rx="2" fill="#FCE4F0" stroke="#E7157B" stroke-width="1.5"/>
+  <rect x="432" y="280" width="14" height="8" rx="2" fill="#FCE4F0" stroke="#E7157B" stroke-width="1.5"/>
+  <rect x="453" y="280" width="14" height="8" rx="2" fill="#E7157B"/>
+  <rect x="474" y="280" width="14" height="8" rx="2" fill="#FCE4F0" stroke="#E7157B" stroke-width="1.5"/>
+  <text x="477" y="308" text-anchor="middle" fill="#9D174D"
+        font-size="12" font-weight="bold">AWS API Gateway</text>
+  <text x="477" y="321" text-anchor="middle" fill="#6B7280" font-size="10">HTTP API エンドポイント</text>
+
+  <!-- Arrow: API Gateway → Lambda -->
+  <line x1="565" y1="272" x2="700" y2="272"
+        stroke="#E7157B" stroke-width="2" marker-end="url(#arrow-pink)"/>
+  <text x="632" y="264" text-anchor="middle" fill="#E7157B" font-size="9">関数呼び出し</text>
+
+  <!-- Lambda box (x=705, y=218, w=175, h=110) -->
+  <rect x="705" y="218" width="175" height="110" rx="10"
+        fill="white" stroke="#FF9900" stroke-width="2"/>
+  <!-- Accent bar -->
+  <rect x="705" y="218" width="175" height="5" rx="10" fill="#FF9900"/>
+  <!-- Lambda icon: λ symbol -->
+  <text x="792" y="275" text-anchor="middle" fill="#FF9900"
+        font-size="40" font-weight="bold">λ</text>
+  <text x="792" y="300" text-anchor="middle" fill="#B45309"
+        font-size="12" font-weight="bold">AWS Lambda</text>
+  <text x="792" y="315" text-anchor="middle" fill="#6B7280" font-size="9">FastAPI + Mangum (Python 3.11+)</text>
+
+  <!-- Lambda deps note -->
+  <rect x="888" y="222" width="120" height="62" rx="6"
+        fill="#FFF3E0" stroke="#FF9900" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="948" y="238" text-anchor="middle" fill="#92400E" font-size="8" font-weight="bold">依存ライブラリ</text>
+  <text x="948" y="251" text-anchor="middle" fill="#92400E" font-size="8">FastAPI, Mangum</text>
+  <text x="948" y="263" text-anchor="middle" fill="#92400E" font-size="8">Motor (async), Beanie ODM</text>
+  <text x="948" y="275" text-anchor="middle" fill="#92400E" font-size="8">python-jose, passlib/bcrypt</text>
+
+  <!-- ============================================================ -->
+  <!-- ZONE 3: DATABASE LAYER                                       -->
+  <!-- Lambda → MongoDB Atlas                                       -->
+  <!-- ============================================================ -->
+
+  <!-- Vertical connection: Lambda → MongoDB Atlas -->
+  <line x1="792" y1="376" x2="792" y2="420"
+        stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3"
+        marker-end="url(#arrow-green)"/>
+  <text x="810" y="402" fill="#059669" font-size="9">Motor / 非同期接続</text>
+
+  <!-- MongoDB Atlas box (x=705, y=390, w=175, h=95) -->
+  <rect x="705" y="390" width="175" height="95" rx="10"
+        fill="white" stroke="#00ED64" stroke-width="2"/>
+  <!-- Accent bar -->
+  <rect x="705" y="390" width="175" height="5" rx="10" fill="#00ED64"/>
+  <!-- MongoDB leaf icon (simplified path) -->
+  <path d="M792,405 C792,405 777,420 777,434 C777,444 784,451 792,453 C800,451 807,444 807,434 C807,420 792,405 792,405 Z"
+        fill="#00ED64" opacity="0.85"/>
+  <text x="792" y="463" text-anchor="middle" fill="#065F46"
+        font-size="12" font-weight="bold">MongoDB Atlas</text>
+  <text x="792" y="477" text-anchor="middle" fill="#6B7280" font-size="10">クラウド DB（外部サービス）</text>
+
+  <!-- External badge -->
+  <rect x="705" y="487" width="175" height="20" rx="4"
+        fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="792" y="501" text-anchor="middle" fill="#065F46" font-size="9">
+    外部接続 — TLS 暗号化通信
+  </text>
+
+  <!-- ============================================================ -->
+  <!-- ZONE 4: SECURITY / IAM LAYER                                 -->
+  <!-- GitHub Actions → OIDC → IAM Role                            -->
+  <!-- ============================================================ -->
+
+  <!-- GitHub Actions box (x=130, y=524, w=165, h=90) -->
+  <rect x="130" y="524" width="165" height="90" rx="10"
+        fill="white" stroke="#24292F" stroke-width="2"/>
+  <!-- Accent bar -->
+  <rect x="130" y="524" width="165" height="5" rx="10" fill="#24292F"/>
+  <!-- GitHub icon (simplified circle + ears) -->
+  <circle cx="212" cy="553" r="16" fill="#F0F0F0" stroke="#24292F" stroke-width="1.5"/>
+  <circle cx="202" cy="541" r="5" fill="#F0F0F0" stroke="#24292F" stroke-width="1.5"/>
+  <circle cx="222" cy="541" r="5" fill="#F0F0F0" stroke="#24292F" stroke-width="1.5"/>
+  <text x="212" y="581" text-anchor="middle" fill="#24292F"
+        font-size="11" font-weight="bold">GitHub Actions</text>
+  <text x="212" y="595" text-anchor="middle" fill="#6B7280" font-size="9">main ブランチ push で起動</text>
+  <text x="212" y="607" text-anchor="middle" fill="#6B7280" font-size="8">backend/frontend-deploy.yml</text>
+
+  <!-- Arrow: GitHub Actions → OIDC Provider -->
+  <line x1="295" y1="569" x2="405" y2="569"
+        stroke="#DD344C" stroke-width="2" marker-end="url(#arrow-red)"/>
+  <text x="350" y="561" text-anchor="middle" fill="#DD344C" font-size="9">OIDC トークン送信</text>
+
+  <!-- OIDC Provider box (x=410, y=527, w=140, h=80) -->
+  <rect x="410" y="527" width="140" height="80" rx="10"
+        fill="white" stroke="#DD344C" stroke-width="2"/>
+  <!-- Accent bar -->
+  <rect x="410" y="527" width="140" height="5" rx="10" fill="#DD344C"/>
+  <!-- Shield icon -->
+  <path d="M480,542 L496,550 L496,567 C496,576 480,583 480,583 C480,583 464,576 464,567 L464,550 Z"
+        fill="#FDECEA" stroke="#DD344C" stroke-width="1.5"/>
+  <text x="480" y="566" text-anchor="middle" fill="#DD344C" font-size="13" font-weight="bold">✓</text>
+  <text x="480" y="592" text-anchor="middle" fill="#7F1D1D"
+        font-size="11" font-weight="bold">OIDC Provider</text>
+  <text x="480" y="604" text-anchor="middle" fill="#6B7280" font-size="9">トークン検証・認証</text>
+
+  <!-- Arrow: OIDC → IAM Role -->
+  <line x1="550" y1="569" x2="665" y2="569"
+        stroke="#DD344C" stroke-width="2" marker-end="url(#arrow-red)"/>
+  <text x="607" y="561" text-anchor="middle" fill="#DD344C" font-size="9">AssumeRole</text>
+
+  <!-- IAM Role box (x=670, y=517, w=175, h=100) -->
+  <rect x="670" y="517" width="175" height="100" rx="10"
+        fill="white" stroke="#DD344C" stroke-width="2"/>
+  <!-- Accent bar -->
+  <rect x="670" y="517" width="175" height="5" rx="10" fill="#DD344C"/>
+  <!-- Key icon -->
+  <circle cx="730" cy="549" r="13" fill="#FDECEA" stroke="#DD344C" stroke-width="1.5"/>
+  <rect x="740" y="547" width="22" height="7" rx="2" fill="#DD344C"/>
+  <rect x="758" y="549" width="5" height="9" rx="1" fill="#DD344C"/>
+  <rect x="752" y="549" width="5" height="7" rx="1" fill="#DD344C"/>
+  <text x="757" y="582" text-anchor="middle" fill="#7F1D1D"
+        font-size="12" font-weight="bold">AWS IAM Role</text>
+  <text x="757" y="597" text-anchor="middle" fill="#6B7280" font-size="9">OIDC 認証（シークレットキー不要）</text>
+
+  <!-- IAM permissions badge -->
+  <rect x="670" y="621" width="175" height="52" rx="4"
+        fill="#FDECEA" stroke="#DD344C" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="757" y="636" text-anchor="middle" fill="#7F1D1D" font-size="8" font-weight="bold">付与する権限</text>
+  <text x="757" y="649" text-anchor="middle" fill="#7F1D1D" font-size="7">lambda:UpdateFunctionCode</text>
+  <text x="757" y="660" text-anchor="middle" fill="#7F1D1D" font-size="7">s3:PutObject / s3:DeleteObject</text>
+  <text x="757" y="671" text-anchor="middle" fill="#7F1D1D" font-size="7">cloudfront:CreateInvalidation</text>
+
+  <!-- ============================================================ -->
+  <!-- ZONE 5: CI/CD PIPELINE FLOW                                  -->
+  <!-- ============================================================ -->
+
+  <text x="135" y="650" fill="#1F2937" font-size="11" font-weight="bold">CI/CD パイプライン自動デプロイフロー</text>
+
+  <!-- Step 1: git push -->
+  <rect x="130" y="658" width="120" height="52" rx="8"
+        fill="#1F2937" stroke="#374151" stroke-width="1.5"/>
+  <text x="190" y="679" text-anchor="middle" fill="white" font-size="10" font-weight="bold">git push</text>
+  <text x="190" y="694" text-anchor="middle" fill="#9CA3AF" font-size="8">main ブランチ</text>
+  <text x="190" y="704" text-anchor="middle" fill="#6B7280" font-size="7">(Pull Request merge)</text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="250" y1="684" x2="285" y2="684"
+        stroke="#F59E0B" stroke-width="2" marker-end="url(#arrow-orange)"/>
+
+  <!-- Step 2: GitHub Actions trigger -->
+  <rect x="290" y="658" width="130" height="52" rx="8"
+        fill="#24292F" stroke="#374151" stroke-width="1.5"/>
+  <text x="355" y="679" text-anchor="middle" fill="white" font-size="10" font-weight="bold">GitHub Actions</text>
+  <text x="355" y="694" text-anchor="middle" fill="#9CA3AF" font-size="8">Workflow 起動</text>
+  <text x="355" y="704" text-anchor="middle" fill="#6B7280" font-size="7">CI: pytest + vitest</text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="420" y1="684" x2="455" y2="684"
+        stroke="#F59E0B" stroke-width="2" marker-end="url(#arrow-orange)"/>
+
+  <!-- Step 3: OIDC Authentication -->
+  <rect x="460" y="658" width="130" height="52" rx="8"
+        fill="#7F1D1D" stroke="#DD344C" stroke-width="1.5"/>
+  <text x="525" y="679" text-anchor="middle" fill="white" font-size="10" font-weight="bold">OIDC → IAM</text>
+  <text x="525" y="694" text-anchor="middle" fill="#FCA5A5" font-size="8">AWS 認証取得</text>
+  <text x="525" y="704" text-anchor="middle" fill="#FECACA" font-size="7">シークレット不要</text>
+
+  <!-- Branching arrows from step 3 -->
+  <!-- Line to Backend box -->
+  <line x1="590" y1="675" x2="618" y2="660"
+        stroke="#F59E0B" stroke-width="1.5"/>
+  <line x1="618" y1="660" x2="655" y2="660"
+        stroke="#F59E0B" stroke-width="1.5" marker-end="url(#arrow-orange)"/>
+  <!-- Line to Frontend box -->
+  <line x1="590" y1="693" x2="618" y2="716"
+        stroke="#F59E0B" stroke-width="1.5"/>
+  <line x1="618" y1="716" x2="655" y2="716"
+        stroke="#F59E0B" stroke-width="1.5" marker-end="url(#arrow-orange)"/>
+
+  <!-- Step 4a: Backend Deploy -->
+  <rect x="660" y="643" width="160" height="42" rx="8"
+        fill="#B45309" stroke="#FF9900" stroke-width="1.5"/>
+  <text x="740" y="661" text-anchor="middle" fill="white" font-size="9" font-weight="bold">バックエンド デプロイ</text>
+  <text x="740" y="674" text-anchor="middle" fill="#FEF3C7" font-size="7">ZIP 化 → lambda update-function-code</text>
+
+  <!-- Step 4b: Frontend Deploy -->
+  <rect x="660" y="698" width="160" height="42" rx="8"
+        fill="#065F46" stroke="#7AA116" stroke-width="1.5"/>
+  <text x="740" y="716" text-anchor="middle" fill="white" font-size="9" font-weight="bold">フロントエンド デプロイ</text>
+  <text x="740" y="729" text-anchor="middle" fill="#D1FAE5" font-size="7">Vite build → s3 sync → CF invalidation</text>
+
+  <!-- Arrow: Backend Deploy → Lambda ref -->
+  <line x1="820" y1="664" x2="860" y2="664"
+        stroke="#FF9900" stroke-width="1.5" stroke-dasharray="4,2"
+        marker-end="url(#arrow-orange)"/>
+  <rect x="865" y="650" width="90" height="28" rx="4"
+        fill="#FFF3E0" stroke="#FF9900" stroke-width="1"/>
+  <text x="910" y="668" text-anchor="middle" fill="#92400E" font-size="9" font-weight="bold">Lambda (λ)</text>
+
+  <!-- Arrow: Frontend Deploy → S3 + CloudFront ref -->
+  <line x1="820" y1="719" x2="860" y2="719"
+        stroke="#7AA116" stroke-width="1.5" stroke-dasharray="4,2"
+        marker-end="url(#arrow-orange)"/>
+  <rect x="865" y="705" width="90" height="28" rx="4"
+        fill="#EEF6E6" stroke="#7AA116" stroke-width="1"/>
+  <text x="910" y="723" text-anchor="middle" fill="#3A5E0D" font-size="9" font-weight="bold">S3 + CloudFront</text>
+
+  <!-- ============================================================ -->
+  <!-- LEGEND                                                        -->
+  <!-- ============================================================ -->
+  <rect x="115" y="800" width="1085" height="48" rx="6"
+        fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="135" y="820" fill="#6B7280" font-size="10" font-weight="bold">凡例 (Legend):</text>
+
+  <!-- User flow -->
+  <line x1="220" y1="818" x2="255" y2="818"
+        stroke="#3B82F6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <text x="260" y="822" fill="#1F2937" font-size="9">ユーザーリクエスト</text>
+
+  <!-- CI/CD flow -->
+  <line x1="375" y1="818" x2="410" y2="818"
+        stroke="#F59E0B" stroke-width="2" marker-end="url(#arrow-orange)"/>
+  <text x="415" y="822" fill="#1F2937" font-size="9">CI/CD デプロイ</text>
+
+  <!-- API invocation -->
+  <line x1="510" y1="818" x2="545" y2="818"
+        stroke="#E7157B" stroke-width="2" marker-end="url(#arrow-pink)"/>
+  <text x="550" y="822" fill="#1F2937" font-size="9">API 呼び出し</text>
+
+  <!-- IAM auth -->
+  <line x1="640" y1="818" x2="675" y2="818"
+        stroke="#DD344C" stroke-width="2" marker-end="url(#arrow-red)"/>
+  <text x="680" y="822" fill="#1F2937" font-size="9">IAM / OIDC 認証</text>
+
+  <!-- External service -->
+  <line x1="775" y1="818" x2="810" y2="818"
+        stroke="#059669" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrow-green)"/>
+  <text x="815" y="822" fill="#1F2937" font-size="9">外部サービス接続</text>
+
+  <!-- Second line info -->
+  <text x="135" y="840" fill="#9CA3AF" font-size="8">
+    AWS Region: ap-northeast-1 (Tokyo) | Runtime: Python 3.11+ | Frontend: React 18 + TypeScript + Vite | DB: MongoDB Atlas (外部)
+  </text>
+
+  <!-- ============================================================ -->
+  <!-- CAPTION BAR                                                   -->
+  <!-- ============================================================ -->
+  <rect x="0" y="825" width="1200" height="30" fill="#1F2937" opacity="0.9"/>
+  <text x="600" y="845" text-anchor="middle" fill="white" font-size="11">
+    図: TeamBoard AWS アーキテクチャ — Frontend (S3+CloudFront) / Backend (API Gateway+Lambda) / DB (MongoDB Atlas) / CI/CD (GitHub Actions + OIDC)
+  </text>
+
+</svg>
