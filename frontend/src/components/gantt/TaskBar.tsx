@@ -1,6 +1,6 @@
 import { useDraggable } from "@dnd-kit/core";
 import type { Task } from "../../types/task";
-import { GANTT_CONFIG } from "./GanttChart";
+import { GANTT_CONFIG } from "./ganttUtils";
 
 interface TaskBarProps {
   task: Task;

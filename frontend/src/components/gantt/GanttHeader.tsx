@@ -1,4 +1,4 @@
-import { GANTT_CONFIG, diffInDays } from "./GanttChart";
+import { GANTT_CONFIG, diffInDays } from "./ganttUtils";
 
 const MONTH_ROW_HEIGHT = 28;
 const DAY_ROW_HEIGHT = GANTT_CONFIG.headerHeight - MONTH_ROW_HEIGHT;

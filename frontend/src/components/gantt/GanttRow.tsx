@@ -1,6 +1,6 @@
 import type { Task } from "../../types/task";
 import { TaskBar } from "./TaskBar";
-import { GANTT_CONFIG, diffInDays } from "./GanttChart";
+import { GANTT_CONFIG, diffInDays } from "./ganttUtils";
 
 interface GanttRowProps {
   task: Task;

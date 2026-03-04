@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { Task } from "../../types/task";
 import type { Member } from "../../types/member";
 import { GanttRow } from "./GanttRow";
-import { GANTT_CONFIG } from "./GanttChart";
+import { GANTT_CONFIG } from "./ganttUtils";
 
 interface MemberGroupProps {
   member: Member;
