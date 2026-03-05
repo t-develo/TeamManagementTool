@@ -635,9 +635,10 @@ Outputs:
   # ----- バックエンド -----
   ApiUrl:
     Description: >
-      バックエンド API Gateway URL
+      バックエンド API Gateway URL（/api サフィックス付き）
       GitHub Secrets: VITE_API_URL に設定してください。
-    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com'
+      FastAPI のルートは /api プレフィックスを使用するため /api を含めています。
+    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/api'
     Export:
       Name: !Sub '${ProjectName}-ApiUrl'
 

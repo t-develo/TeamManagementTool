@@ -42,9 +42,3 @@ jobs:
             --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
             --zip-file fileb://api.zip
         working-directory: backend
-
-      - name: Configure API Gateway CORS
-        run: |
-          aws apigatewayv2 update-api \
-            --api-id ${{ secrets.API_GATEWAY_ID }} \
-            --cors-configuration "{\"AllowOrigins\":[\"${{ secrets.FRONTEND_ORIGIN }}\"],\"AllowMethods\":[\"GET\",\"POST\",\"PUT\",\"DELETE\",\"OPTIONS\"],\"AllowHeaders\":[\"Content-Type\",\"Authorization\"],\"AllowCredentials\":true,\"MaxAge\":300}"
