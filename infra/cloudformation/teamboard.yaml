@@ -503,12 +503,12 @@ Resources:
                   })
               }
       # ----- 環境変数 -----
-      # SSM ダイナミック参照を使用してシークレットを安全に渡す
+      # CloudFormation パラメータを直接参照（同一スタック内の SSM パラメータ作成前に解決されるため）
       Environment:
         Variables:
-          MONGODB_URL: !Sub '{{resolve:ssm:/${ProjectName}/MONGODB_URL}}'
+          MONGODB_URL: !Ref MongodbUrl
           MONGODB_DB_NAME: !Ref MongodbDbName
-          JWT_SECRET_KEY: !Sub '{{resolve:ssm:/${ProjectName}/JWT_SECRET_KEY}}'
+          JWT_SECRET_KEY: !Ref JwtSecretKey
           JWT_ALGORITHM: !Ref JwtAlgorithm
           JWT_ACCESS_TOKEN_EXPIRE_MINUTES: !Ref JwtExpireMinutes
           # CORS 許可オリジン: CloudFront ドメインを設定
