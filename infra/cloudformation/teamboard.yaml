@@ -530,24 +530,8 @@ Resources:
       Name: !Sub '${ProjectName}-http-api'
       Description: !Sub 'TeamBoard (${ProjectName}) HTTP API — routes all requests to Lambda'
       ProtocolType: HTTP
-      # CORS 設定: CloudFront ドメインからのリクエストのみ許可
-      CorsConfiguration:
-        AllowOrigins:
-          - !Sub 'https://${CloudFrontDistribution.DomainName}'
-        AllowMethods:
-          - GET
-          - POST
-          - PUT
-          - PATCH
-          - DELETE
-          - OPTIONS
-        AllowHeaders:
-          - Content-Type
-          - Authorization
-          - X-Requested-With
-          - X-Api-Key
-        AllowCredentials: true
-        MaxAge: 600
+      # CORS は Lambda (FastAPI CORSMiddleware) で処理するため API Gateway では設定しない。
+      # CloudFrontDistribution.DomainName を動的参照すると EarlyValidation が失敗するため削除。
       Tags:
         Project: !Ref ProjectName
         ManagedBy: CloudFormation
