@@ -264,6 +264,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - lambda:UpdateFunctionCode
+                  - lambda:UpdateFunctionConfiguration
                   - lambda:GetFunction
                   - lambda:GetFunctionConfiguration
                   - lambda:PublishVersion
@@ -477,8 +478,9 @@ Resources:
       FunctionName: !Sub '${ProjectName}-api'
       Description: !Sub 'TeamBoard (${ProjectName}) FastAPI backend via Mangum ASGI adapter'
       Runtime: python3.11
-      # FastAPI アプリの Mangum ハンドラーを指定
-      Handler: app.main.handler
+      # プレースホルダー用ハンドラー（ZipFile はフラット構造のため index.handler を使用）
+      # CI/CD デプロイ後に update-function-configuration で app.main.handler に更新される
+      Handler: index.handler
       Role: !GetAtt LambdaExecutionRole.Arn
       MemorySize: !Ref LambdaMemorySize
       Timeout: !Ref LambdaTimeout
