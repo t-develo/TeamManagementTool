@@ -1,0 +1,671 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  TeamBoard - Team Management Application AWS Infrastructure
+  Provisions: S3 (frontend), CloudFront (CDN), API Gateway v2 (HTTP API),
+  Lambda (FastAPI backend), IAM Roles (Lambda execution + GitHub Actions OIDC),
+  SSM Parameter Store (secrets), CloudWatch Logs.
+  Region: ap-northeast-1 (Tokyo) recommended.
+
+# ===========================================================================
+# METADATA
+# ===========================================================================
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "プロジェクト設定 (Project)"
+        Parameters:
+          - ProjectName
+      - Label:
+          default: "GitHub Actions OIDC 設定 (CI/CD)"
+        Parameters:
+          - GitHubOrg
+          - GitHubRepo
+          - GitHubBranch
+          - CreateOIDCProvider
+      - Label:
+          default: "アプリケーション設定 (Application)"
+        Parameters:
+          - MongodbUrl
+          - MongodbDbName
+          - JwtSecretKey
+          - JwtAlgorithm
+          - JwtExpireMinutes
+          - AllowedEmails
+      - Label:
+          default: "Lambda 設定 (Compute)"
+        Parameters:
+          - LambdaMemorySize
+          - LambdaTimeout
+          - LogRetentionDays
+    ParameterLabels:
+      ProjectName:
+        default: "プロジェクト名（リソース名プレフィックス）"
+      GitHubOrg:
+        default: "GitHub 組織名 / ユーザー名"
+      GitHubRepo:
+        default: "GitHub リポジトリ名"
+      GitHubBranch:
+        default: "デプロイトリガーブランチ"
+      CreateOIDCProvider:
+        default: "OIDC プロバイダーを作成する"
+      MongodbUrl:
+        default: "MongoDB 接続 URL"
+      MongodbDbName:
+        default: "MongoDB データベース名"
+      JwtSecretKey:
+        default: "JWT 署名シークレットキー"
+      JwtAlgorithm:
+        default: "JWT アルゴリズム"
+      JwtExpireMinutes:
+        default: "JWT トークン有効期限（分）"
+      AllowedEmails:
+        default: "許可メールアドレス（カンマ区切り、空=全員許可）"
+      LambdaMemorySize:
+        default: "Lambda メモリサイズ (MB)"
+      LambdaTimeout:
+        default: "Lambda タイムアウト（秒）"
+      LogRetentionDays:
+        default: "CloudWatch ログ保持期間（日）"
+
+# ===========================================================================
+# PARAMETERS
+# ===========================================================================
+Parameters:
+
+  # ---------- Project ----------
+  ProjectName:
+    Type: String
+    Default: teamboard
+    MinLength: 2
+    MaxLength: 20
+    AllowedPattern: '[a-z0-9\-]+'
+    ConstraintDescription: "英小文字・数字・ハイフンのみ (2〜20文字)"
+    Description: リソース名のプレフィックスに使用します。
+
+  # ---------- GitHub Actions OIDC ----------
+  GitHubOrg:
+    Type: String
+    Description: >
+      GitHub の組織名またはユーザー名。
+      例: t-develo
+  GitHubRepo:
+    Type: String
+    Default: TeamManagementTool
+    Description: GitHub リポジトリ名。
+  GitHubBranch:
+    Type: String
+    Default: main
+    Description: >
+      このブランチへの push 時に GitHub Actions が起動してデプロイします。
+  CreateOIDCProvider:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+    Description: >
+      AWS アカウントに GitHub Actions の OIDC プロバイダーが既に存在する場合は
+      'false' に設定してください。重複作成するとスタック作成が失敗します。
+
+  # ---------- Application Secrets ----------
+  MongodbUrl:
+    Type: String
+    NoEcho: true
+    Description: >
+      MongoDB Atlas 接続 URL。
+      例: mongodb+srv://user:password@cluster.mongodb.net/
+  MongodbDbName:
+    Type: String
+    Default: teamboard
+    Description: 使用する MongoDB データベース名。
+  JwtSecretKey:
+    Type: String
+    NoEcho: true
+    MinLength: 32
+    Description: >
+      JWT トークン署名用シークレットキー（32文字以上を推奨）。
+      例: openssl rand -hex 32 で生成できます。
+  JwtAlgorithm:
+    Type: String
+    Default: HS256
+    AllowedValues: [HS256, HS384, HS512]
+    Description: JWT 署名アルゴリズム。
+  JwtExpireMinutes:
+    Type: Number
+    Default: 480
+    MinValue: 1
+    MaxValue: 10080
+    Description: JWT アクセストークンの有効期限（分）。デフォルトは 8 時間。
+  AllowedEmails:
+    Type: String
+    Default: ''
+    Description: >
+      ログインを許可するメールアドレス（カンマ区切り）。
+      空文字の場合はすべてのアカウントを許可します。
+
+  # ---------- Lambda ----------
+  LambdaMemorySize:
+    Type: Number
+    Default: 512
+    AllowedValues: [128, 256, 512, 1024, 2048]
+    Description: Lambda 関数に割り当てるメモリ (MB)。
+  LambdaTimeout:
+    Type: Number
+    Default: 30
+    MinValue: 1
+    MaxValue: 900
+    Description: Lambda 関数のタイムアウト（秒）。
+  LogRetentionDays:
+    Type: Number
+    Default: 30
+    AllowedValues: [1, 3, 5, 7, 14, 30, 60, 90, 180, 365]
+    Description: CloudWatch Logs の保持期間（日）。
+
+# ===========================================================================
+# CONDITIONS
+# ===========================================================================
+Conditions:
+  # OIDC プロバイダーをこのスタックで作成するかどうか
+  ShouldCreateOIDCProvider: !Equals [!Ref CreateOIDCProvider, 'true']
+
+# ===========================================================================
+# RESOURCES
+# ===========================================================================
+Resources:
+
+  # =========================================================================
+  # SECTION 1: IAM — Lambda 実行ロール
+  # =========================================================================
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-lambda-execution-role'
+      Description: Lambda 関数用 IAM 実行ロール（CloudWatch Logs 書き込み + SSM 読み取り）
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        # CloudWatch Logs への書き込み権限（基本実行ロール）
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        # SSM Parameter Store からシークレットを読み取る権限
+        - PolicyName: SSMReadPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:GetParametersByPath
+                Resource:
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/*'
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  # =========================================================================
+  # SECTION 2: IAM — GitHub Actions OIDC プロバイダー & デプロイロール
+  # =========================================================================
+
+  # GitHub Actions 用 OIDC Identity Provider
+  # ※ AWS アカウントに 1 つだけ存在できます。既存の場合は CreateOIDCProvider=false に設定してください。
+  GitHubOIDCProvider:
+    Type: AWS::IAM::OIDCProvider
+    Condition: ShouldCreateOIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      # GitHub Actions の公式 thumbprint リスト（2023年以降）
+      ThumbprintList:
+        - 6938fd4d98bab03faadb97b34396831e3780aea1
+        - 1c58a3a8518e8759bf075b76b750d4f2df264fcd
+
+  # GitHub Actions が AWS リソースを操作するための IAM ロール
+  GitHubActionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-github-actions-role'
+      Description: >
+        GitHub Actions が OIDC 認証でデプロイするための IAM ロール。
+        シークレットキーを GitHub に保存せずに AWS を操作できます。
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !If
+                - ShouldCreateOIDCProvider
+                - !GetAtt GitHubOIDCProvider.Arn
+                # 既存の OIDC プロバイダーを参照
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com'
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                # aud は必ず sts.amazonaws.com を指定
+                'token.actions.githubusercontent.com:aud': sts.amazonaws.com
+              StringLike:
+                # 指定ブランチへの push のみ許可
+                'token.actions.githubusercontent.com:sub':
+                  !Sub 'repo:${GitHubOrg}/${GitHubRepo}:ref:refs/heads/${GitHubBranch}'
+      Policies:
+        # バックエンド: Lambda 関数コードの更新
+        - PolicyName: LambdaDeployPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:UpdateFunctionCode
+                  - lambda:GetFunction
+                  - lambda:GetFunctionConfiguration
+                  - lambda:PublishVersion
+                Resource: !GetAtt LambdaFunction.Arn
+        # フロントエンド: S3 バケットへのアップロード
+        - PolicyName: S3DeployPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:GetObject
+                Resource: !Sub '${FrontendBucket.Arn}/*'
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !GetAtt FrontendBucket.Arn
+        # フロントエンド: CloudFront キャッシュ無効化
+        - PolicyName: CloudFrontInvalidationPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudfront:CreateInvalidation
+                  - cloudfront:GetInvalidation
+                Resource:
+                  !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  # =========================================================================
+  # SECTION 3: SSM Parameter Store — アプリケーションシークレット
+  # =========================================================================
+
+  MongodbUrlParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${ProjectName}/MONGODB_URL'
+      Type: String  # SecureString は CloudFormation 未対応。本番では AWS CLI で SecureString に変換を推奨。
+      Value: !Ref MongodbUrl
+      Description: !Sub 'TeamBoard (${ProjectName}): MongoDB Atlas 接続 URL'
+      Tags:
+        Project: !Ref ProjectName
+        ManagedBy: CloudFormation
+
+  JwtSecretKeyParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${ProjectName}/JWT_SECRET_KEY'
+      Type: String
+      Value: !Ref JwtSecretKey
+      Description: !Sub 'TeamBoard (${ProjectName}): JWT 署名シークレットキー'
+      Tags:
+        Project: !Ref ProjectName
+        ManagedBy: CloudFormation
+
+  # =========================================================================
+  # SECTION 4: S3 — フロントエンド静的アセット用バケット
+  # =========================================================================
+
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    # スタック削除時にバケットを残す（データ保護のため）
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub '${ProjectName}-frontend-${AWS::AccountId}'
+      # パブリックアクセスを完全ブロック（CloudFront OAC 経由のみ許可）
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      # バージョニング有効（ロールバック対応）
+      VersioningConfiguration:
+        Status: Enabled
+      # 古いバージョンを 30 日後に削除してコスト最適化
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldVersions
+            Status: Enabled
+            NoncurrentVersionExpirationInDays: 30
+      # サーバーサイド暗号化（デフォルト）
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  # CloudFront OAC からのアクセスのみを許可するバケットポリシー
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontOACAccess
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub '${FrontendBucket.Arn}/*'
+            Condition:
+              # このディストリビューションからのリクエストのみ許可
+              StringEquals:
+                'AWS:SourceArn':
+                  !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
+
+  # =========================================================================
+  # SECTION 5: CloudFront — CDN ディストリビューション
+  # =========================================================================
+
+  # OAC (Origin Access Control) — S3 への安全なアクセス制御（OAI の後継）
+  CloudFrontOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub '${ProjectName}-s3-oac'
+        Description: !Sub 'OAC for ${ProjectName} frontend S3 bucket'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub '${ProjectName} Frontend CDN Distribution'
+        # SPA ルーティングのデフォルトページ
+        DefaultRootObject: index.html
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        # コスト優先の場合は PriceClass_100 (北米・欧州のみ) に変更可
+        PriceClass: PriceClass_All
+
+        # ----- オリジン: S3 バケット -----
+        Origins:
+          - Id: S3FrontendOrigin
+            DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            # OAI は使用しない (OAC を使用)
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !GetAtt CloudFrontOAC.Id
+
+        # ----- デフォルトキャッシュ動作 -----
+        DefaultCacheBehavior:
+          TargetOriginId: S3FrontendOrigin
+          # HTTP → HTTPS リダイレクト
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD, OPTIONS]
+          CachedMethods: [GET, HEAD]
+          # CachingOptimized マネージドポリシー (TTL: 1日デフォルト)
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          # Gzip / Brotli 圧縮有効
+          Compress: true
+
+        # ----- SPA ルーティング対応: 404/403 → index.html にフォールバック -----
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 0
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 0
+
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  # =========================================================================
+  # SECTION 6: CloudWatch Logs — Lambda ログループ
+  # =========================================================================
+
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    # スタック削除時にログを残す（監査目的）
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ProjectName}-api'
+      RetentionInDays: !Ref LogRetentionDays
+
+  # =========================================================================
+  # SECTION 7: Lambda — バックエンド API 関数
+  # =========================================================================
+
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    # ログループを先に作成してから関数を作成する
+    DependsOn:
+      - LambdaLogGroup
+      - MongodbUrlParameter
+      - JwtSecretKeyParameter
+    Properties:
+      FunctionName: !Sub '${ProjectName}-api'
+      Description: !Sub 'TeamBoard (${ProjectName}) FastAPI backend via Mangum ASGI adapter'
+      Runtime: python3.11
+      # FastAPI アプリの Mangum ハンドラーを指定
+      Handler: app.main.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      MemorySize: !Ref LambdaMemorySize
+      Timeout: !Ref LambdaTimeout
+      # プレースホルダーコード — CI/CD パイプラインが実際のコードに置き換えます
+      Code:
+        ZipFile: |
+          import json
+          def handler(event, context):
+              """
+              プレースホルダー関数。
+              CI/CD パイプライン (backend-deploy.yml) が実行されると
+              FastAPI + Mangum の実際のコードに置き換わります。
+              """
+              return {
+                  "statusCode": 503,
+                  "headers": {
+                      "Content-Type": "application/json",
+                      "Access-Control-Allow-Origin": "*"
+                  },
+                  "body": json.dumps({
+                      "detail": "Application not yet deployed. Please run the CI/CD pipeline."
+                  })
+              }
+      # ----- 環境変数 -----
+      # SSM ダイナミック参照を使用してシークレットを安全に渡す
+      Environment:
+        Variables:
+          MONGODB_URL: !Sub '{{resolve:ssm:/${ProjectName}/MONGODB_URL}}'
+          MONGODB_DB_NAME: !Ref MongodbDbName
+          JWT_SECRET_KEY: !Sub '{{resolve:ssm:/${ProjectName}/JWT_SECRET_KEY}}'
+          JWT_ALGORITHM: !Ref JwtAlgorithm
+          JWT_ACCESS_TOKEN_EXPIRE_MINUTES: !Ref JwtExpireMinutes
+          # CORS 許可オリジン: CloudFront ドメインを設定
+          CORS_ORIGINS: !Sub 'https://${CloudFrontDistribution.DomainName}'
+          ALLOWED_EMAILS: !Ref AllowedEmails
+      Tags:
+        Project: !Ref ProjectName
+        ManagedBy: CloudFormation
+
+  # =========================================================================
+  # SECTION 8: API Gateway v2 — HTTP API
+  # =========================================================================
+
+  HttpApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub '${ProjectName}-http-api'
+      Description: !Sub 'TeamBoard (${ProjectName}) HTTP API — routes all requests to Lambda'
+      ProtocolType: HTTP
+      # CORS 設定: CloudFront ドメインからのリクエストのみ許可
+      CorsConfiguration:
+        AllowOrigins:
+          - !Sub 'https://${CloudFrontDistribution.DomainName}'
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+          - Authorization
+          - X-Requested-With
+          - X-Api-Key
+        AllowCredentials: true
+        MaxAge: 600
+      Tags:
+        Project: !Ref ProjectName
+        ManagedBy: CloudFormation
+
+  # $default ステージ: すべてのリクエストをキャッチするデフォルトステージ
+  HttpApiDefaultStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref HttpApi
+      StageName: '$default'
+      # コード変更を自動デプロイ（CI/CD と連携しやすい）
+      AutoDeploy: true
+      # アクセスログを CloudWatch に記録
+      AccessLogSettings:
+        DestinationArn: !GetAtt HttpApiAccessLogGroup.Arn
+      Tags:
+        Project: !Ref ProjectName
+        ManagedBy: CloudFormation
+
+  # API Gateway アクセスログ用 CloudWatch ロググループ
+  HttpApiAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub '/aws/apigateway/${ProjectName}-http-api'
+      RetentionInDays: !Ref LogRetentionDays
+
+  # Lambda プロキシ統合
+  HttpApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt LambdaFunction.Arn
+      # Lambda Proxy v2.0 フォーマット（Mangum 対応）
+      PayloadFormatVersion: '2.0'
+      TimeoutInMillis: 29000
+
+  # すべてのルートを Lambda に転送するデフォルトルート
+  HttpApiDefaultRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: '$default'
+      Target: !Sub 'integrations/${HttpApiIntegration}'
+
+  # API Gateway が Lambda を呼び出す権限
+  LambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt LambdaFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*'
+
+# ===========================================================================
+# OUTPUTS
+# ===========================================================================
+Outputs:
+
+  # ----- フロントエンド -----
+  FrontendUrl:
+    Description: >
+      フロントエンド URL (CloudFront)
+      ブラウザでこの URL にアクセスしてアプリケーションを使用します。
+    Value: !Sub 'https://${CloudFrontDistribution.DomainName}'
+    Export:
+      Name: !Sub '${ProjectName}-FrontendUrl'
+
+  S3BucketName:
+    Description: >
+      フロントエンド S3 バケット名
+      GitHub Secrets: S3_BUCKET_NAME に設定してください。
+    Value: !Ref FrontendBucket
+    Export:
+      Name: !Sub '${ProjectName}-S3BucketName'
+
+  CloudFrontDistributionId:
+    Description: >
+      CloudFront ディストリビューション ID
+      GitHub Secrets: CLOUDFRONT_DISTRIBUTION_ID に設定してください。
+    Value: !Ref CloudFrontDistribution
+    Export:
+      Name: !Sub '${ProjectName}-CloudFrontDistributionId'
+
+  # ----- バックエンド -----
+  ApiUrl:
+    Description: >
+      バックエンド API Gateway URL
+      GitHub Secrets: VITE_API_URL に設定してください。
+    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com'
+    Export:
+      Name: !Sub '${ProjectName}-ApiUrl'
+
+  LambdaFunctionName:
+    Description: >
+      Lambda 関数名
+      GitHub Secrets: LAMBDA_FUNCTION_NAME に設定してください。
+    Value: !Ref LambdaFunction
+    Export:
+      Name: !Sub '${ProjectName}-LambdaFunctionName'
+
+  # ----- CI/CD -----
+  GitHubActionsRoleArn:
+    Description: >
+      GitHub Actions 用 IAM ロール ARN
+      GitHub Secrets: AWS_ROLE_ARN に設定してください。
+    Value: !GetAtt GitHubActionsRole.Arn
+    Export:
+      Name: !Sub '${ProjectName}-GitHubActionsRoleArn'
+
+  # ----- 参考情報 -----
+  StackRegion:
+    Description: デプロイリージョン
+    Value: !Ref AWS::Region
+
+  DeployGuide:
+    Description: デプロイ後の手順
+    Value: >
+      1. Outputs の各値を GitHub Repository Secrets に登録する。
+      2. backend/ 以下を変更して main へ push → Lambda が自動更新される。
+      3. frontend/ 以下を変更して main へ push → S3+CloudFront が自動更新される。
