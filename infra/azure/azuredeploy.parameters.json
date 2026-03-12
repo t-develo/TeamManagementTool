@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "projectName": {
+      "value": "teamboard"
+    },
+    "location": {
+      "value": "japaneast"
+    },
+    "mongodbUrl": {
+      "value": "mongodb+srv://<user>:<password>@<cluster>.mongodb.net/?retryWrites=true&w=majority"
+    },
+    "mongodbDbName": {
+      "value": "teamboard"
+    },
+    "jwtSecretKey": {
+      "value": "<openssl rand -hex 32 で生成したキーに置き換えてください>"
+    },
+    "jwtAlgorithm": {
+      "value": "HS256"
+    },
+    "jwtExpireMinutes": {
+      "value": 480
+    },
+    "allowedEmails": {
+      "value": ""
+    },
+    "corsOrigins": {
+      "value": ""
+    },
+    "logRetentionDays": {
+      "value": 30
+    }
+  }
+}
