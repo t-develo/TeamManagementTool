@@ -1,0 +1,30 @@
+name: Deploy Frontend (Azure)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+
+# SWA deploy アクションは独自のデプロイトークンで認証するため OIDC 不要
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Azure Static Web Apps
+        # ビルド + デプロイ + CDN パージを 1 アクションで実行
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "frontend"
+          output_location: "dist"
+          api_location: ""
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL_AZURE }}

@@ -1,0 +1,379 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "description": "TeamBoard — Azure サーバーレス構成 (Functions + Static Web Apps + Key Vault + Application Insights)"
+  },
+  "parameters": {
+    "projectName": {
+      "type": "string",
+      "defaultValue": "teamboard",
+      "minLength": 2,
+      "maxLength": 20,
+      "metadata": {
+        "description": "リソース名プレフィックス (英小文字・数字・ハイフン、2〜20文字)"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "japaneast",
+      "metadata": {
+        "description": "デプロイリージョン"
+      }
+    },
+    "mongodbUrl": {
+      "type": "securestring",
+      "metadata": {
+        "description": "MongoDB Atlas 接続 URL (mongodb+srv://...)"
+      }
+    },
+    "mongodbDbName": {
+      "type": "string",
+      "defaultValue": "teamboard",
+      "metadata": {
+        "description": "MongoDB データベース名"
+      }
+    },
+    "jwtSecretKey": {
+      "type": "securestring",
+      "minLength": 32,
+      "metadata": {
+        "description": "JWT 署名シークレットキー (openssl rand -hex 32 で生成)"
+      }
+    },
+    "jwtAlgorithm": {
+      "type": "string",
+      "defaultValue": "HS256",
+      "allowedValues": ["HS256", "HS384", "HS512"],
+      "metadata": {
+        "description": "JWT 署名アルゴリズム"
+      }
+    },
+    "jwtExpireMinutes": {
+      "type": "int",
+      "defaultValue": 480,
+      "minValue": 1,
+      "maxValue": 10080,
+      "metadata": {
+        "description": "JWT トークン有効期限 (分)"
+      }
+    },
+    "allowedEmails": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "ログイン許可メールアドレス (カンマ区切り。空=全員許可)"
+      }
+    },
+    "corsOrigins": {
+      "type": "string",
+      "defaultValue": "*",
+      "metadata": {
+        "description": "CORS 許可オリジン (SWA の URL。初回デプロイ後に更新)"
+      }
+    },
+    "logRetentionDays": {
+      "type": "int",
+      "defaultValue": 30,
+      "allowedValues": [7, 14, 30, 60, 90, 180, 365],
+      "metadata": {
+        "description": "ログ保持期間 (日)"
+      }
+    }
+  },
+  "variables": {
+    "uniqueSuffix": "[toLower(substring(uniqueString(resourceGroup().id, parameters('projectName')), 0, 8))]",
+    "logAnalyticsName": "[concat(parameters('projectName'), '-logs')]",
+    "appInsightsName": "[concat(parameters('projectName'), '-insights')]",
+    "storageAccountName": "[toLower(replace(concat(parameters('projectName'), variables('uniqueSuffix')), '-', ''))]",
+    "appServicePlanName": "[concat(parameters('projectName'), '-asp')]",
+    "keyVaultName": "[concat(parameters('projectName'), '-kv-', variables('uniqueSuffix'))]",
+    "functionAppName": "[concat(parameters('projectName'), '-func-', variables('uniqueSuffix'))]",
+    "staticWebAppName": "[concat(parameters('projectName'), '-swa')]"
+  },
+  "resources": [
+    {
+      "comments": "1. Log Analytics Workspace — Application Insights の基盤",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2022-10-01",
+      "name": "[variables('logAnalyticsName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": "[parameters('logRetentionDays')]",
+        "features": {
+          "enableLogAccessUsingOnlyResourcePermissions": true
+        }
+      },
+      "tags": {
+        "Project": "[parameters('projectName')]",
+        "ManagedBy": "ARM"
+      }
+    },
+    {
+      "comments": "2. Application Insights — テレメトリ収集",
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[variables('appInsightsName')]",
+      "location": "[parameters('location')]",
+      "kind": "web",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsName'))]"
+      ],
+      "properties": {
+        "Application_Type": "web",
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsName'))]",
+        "RetentionInDays": "[parameters('logRetentionDays')]"
+      },
+      "tags": {
+        "Project": "[parameters('projectName')]",
+        "ManagedBy": "ARM"
+      }
+    },
+    {
+      "comments": "3. Storage Account — Azure Functions 内部用 (フロントエンド用ではない)",
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-01-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "supportsHttpsTrafficOnly": true,
+        "minimumTlsVersion": "TLS1_2",
+        "allowBlobPublicAccess": false
+      },
+      "tags": {
+        "Project": "[parameters('projectName')]",
+        "ManagedBy": "ARM"
+      }
+    },
+    {
+      "comments": "4. App Service Plan — Consumption Plan (サーバーレス)",
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2023-01-01",
+      "name": "[variables('appServicePlanName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Y1",
+        "tier": "Dynamic"
+      },
+      "kind": "functionapp",
+      "properties": {
+        "reserved": true
+      },
+      "tags": {
+        "Project": "[parameters('projectName')]",
+        "ManagedBy": "ARM"
+      }
+    },
+    {
+      "comments": "5. Key Vault — シークレット管理 (アクセスポリシーモデル)",
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2023-07-01",
+      "name": "[variables('keyVaultName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "tenantId": "[subscription().tenantId]",
+        "enableRbacAuthorization": false,
+        "enableSoftDelete": true,
+        "softDeleteRetentionInDays": 7,
+        "accessPolicies": []
+      },
+      "tags": {
+        "Project": "[parameters('projectName')]",
+        "ManagedBy": "ARM"
+      }
+    },
+    {
+      "comments": "6. Function App — Python 3.11 / Linux / Consumption Plan",
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2023-01-01",
+      "name": "[variables('functionAppName')]",
+      "location": "[parameters('location')]",
+      "kind": "functionapp,linux",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+        "reserved": true,
+        "siteConfig": {
+          "linuxFxVersion": "Python|3.11",
+          "appSettings": [
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2023-01-01').keys[0].value, ';EndpointSuffix=core.windows.net')]"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2023-01-01').keys[0].value, ';EndpointSuffix=core.windows.net')]"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[toLower(variables('functionAppName'))]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~4"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "python"
+            },
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName')), '2020-02-02').InstrumentationKey]"
+            },
+            {
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName')), '2020-02-02').ConnectionString]"
+            },
+            {
+              "name": "MONGODB_URL",
+              "value": "[parameters('mongodbUrl')]"
+            },
+            {
+              "name": "MONGODB_DB_NAME",
+              "value": "[parameters('mongodbDbName')]"
+            },
+            {
+              "name": "JWT_SECRET_KEY",
+              "value": "[parameters('jwtSecretKey')]"
+            },
+            {
+              "name": "JWT_ALGORITHM",
+              "value": "[parameters('jwtAlgorithm')]"
+            },
+            {
+              "name": "JWT_ACCESS_TOKEN_EXPIRE_MINUTES",
+              "value": "[string(parameters('jwtExpireMinutes'))]"
+            },
+            {
+              "name": "ALLOWED_EMAILS",
+              "value": "[parameters('allowedEmails')]"
+            },
+            {
+              "name": "CORS_ORIGINS",
+              "value": "[parameters('corsOrigins')]"
+            }
+          ],
+          "cors": {
+            "allowedOrigins": [
+              "[parameters('corsOrigins')]"
+            ],
+            "supportCredentials": false
+          },
+          "ftpsState": "Disabled",
+          "minTlsVersion": "1.2"
+        },
+        "httpsOnly": true
+      },
+      "tags": {
+        "Project": "[parameters('projectName')]",
+        "ManagedBy": "ARM"
+      }
+    },
+    {
+      "comments": "7. Key Vault Access Policy — Function App の Managed Identity にシークレット読み取り権限を付与",
+      "type": "Microsoft.KeyVault/vaults/accessPolicies",
+      "apiVersion": "2023-07-01",
+      "name": "[concat(variables('keyVaultName'), '/add')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]"
+      ],
+      "properties": {
+        "accessPolicies": [
+          {
+            "tenantId": "[subscription().tenantId]",
+            "objectId": "[reference(resourceId('Microsoft.Web/sites', variables('functionAppName')), '2023-01-01', 'Full').identity.principalId]",
+            "permissions": {
+              "secrets": ["get", "list"]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "comments": "8. Static Web Apps — フロントエンドホスティング (CDN + SSL 自動管理)",
+      "type": "Microsoft.Web/staticSites",
+      "apiVersion": "2023-01-01",
+      "name": "[variables('staticWebAppName')]",
+      "location": "eastasia",
+      "sku": {
+        "name": "Free",
+        "tier": "Free"
+      },
+      "properties": {
+        "buildProperties": {
+          "appLocation": "frontend",
+          "outputLocation": "dist",
+          "apiLocation": ""
+        }
+      },
+      "tags": {
+        "Project": "[parameters('projectName')]",
+        "ManagedBy": "ARM"
+      }
+    }
+  ],
+  "outputs": {
+    "functionAppName": {
+      "type": "string",
+      "value": "[variables('functionAppName')]",
+      "metadata": {
+        "description": "GitHub Secrets: AZURE_FUNCTIONAPP_NAME に設定"
+      }
+    },
+    "functionAppUrl": {
+      "type": "string",
+      "value": "[concat('https://', variables('functionAppName'), '.azurewebsites.net')]",
+      "metadata": {
+        "description": "GitHub Secrets: VITE_API_URL_AZURE に設定"
+      }
+    },
+    "staticWebAppName": {
+      "type": "string",
+      "value": "[variables('staticWebAppName')]",
+      "metadata": {
+        "description": "SWA リソース名 (az staticwebapp secrets list で SWA トークン取得に使用)"
+      }
+    },
+    "staticWebAppUrl": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Web/staticSites', variables('staticWebAppName')), '2023-01-01').defaultHostname]",
+      "metadata": {
+        "description": "フロントエンド URL (ブラウザアクセス確認用)"
+      }
+    },
+    "keyVaultName": {
+      "type": "string",
+      "value": "[variables('keyVaultName')]",
+      "metadata": {
+        "description": "Key Vault 名 (参考情報)"
+      }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "value": "[resourceGroup().name]",
+      "metadata": {
+        "description": "リソースグループ名 (参考情報)"
+      }
+    }
+  }
+}
