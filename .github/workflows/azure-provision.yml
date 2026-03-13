@@ -1,0 +1,313 @@
+name: Provision Azure Resources
+
+# べき等なリソース作成ワークフロー
+# - リソースが存在しない場合: 作成
+# - リソースが既に存在する場合: スキップ (ARM Incremental モードで更新)
+#
+# 【前提条件】初回実行前に手動で一度だけ以下を実行:
+#   az ad app create --display-name "teamboard-github-actions"
+#   az ad sp create --id <CLIENT_ID>
+#   az ad app federated-credential create --id <CLIENT_ID> --parameters '{...}'
+# その後 GitHub Secrets に AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID を設定する
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_name:
+        description: "リソース名プレフィックス (例: teamboard)"
+        required: true
+        default: "teamboard"
+      resource_group:
+        description: "リソースグループ名 (例: teamboard-rg)"
+        required: true
+        default: "teamboard-rg"
+      location:
+        description: "Azureリージョン"
+        required: true
+        default: "japaneast"
+      github_org:
+        description: "GitHub 組織名またはユーザー名"
+        required: true
+      mongodb_url:
+        description: "MongoDB Atlas 接続 URL"
+        required: true
+      jwt_secret_key:
+        description: "JWT シークレットキー (openssl rand -hex 32)"
+        required: true
+      allowed_emails:
+        description: "許可メールアドレス (カンマ区切り。空=全員許可)"
+        required: false
+        default: ""
+  push:
+    branches: [main]
+    paths:
+      - "infra/azure/**"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.project_name || 'teamboard' }}
+      RESOURCE_GROUP: ${{ github.event_name == 'workflow_dispatch' && inputs.resource_group || 'teamboard-rg' }}
+      LOCATION: ${{ github.event_name == 'workflow_dispatch' && inputs.location || 'japaneast' }}
+      APP_DISPLAY_NAME: "teamboard-github-actions"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # =====================================================================
+      # Entra ID アプリ登録 (存在確認 → なければ作成)
+      # =====================================================================
+      - name: Check / Create Entra ID App Registration
+        id: entra_app
+        run: |
+          echo "=== Entra ID アプリ登録の確認 ==="
+          APP_ID=$(az ad app list \
+            --display-name "$APP_DISPLAY_NAME" \
+            --query "[0].appId" \
+            --output tsv 2>/dev/null || echo "")
+
+          if [ -z "$APP_ID" ]; then
+            echo "アプリ登録が存在しません。作成します..."
+            APP_ID=$(az ad app create \
+              --display-name "$APP_DISPLAY_NAME" \
+              --query appId \
+              --output tsv)
+            echo "✓ アプリ登録を作成しました: $APP_ID"
+          else
+            echo "✓ アプリ登録は既に存在します (スキップ): $APP_ID"
+          fi
+
+          echo "app_id=$APP_ID" >> $GITHUB_OUTPUT
+
+      # =====================================================================
+      # サービスプリンシパル (存在確認 → なければ作成)
+      # =====================================================================
+      - name: Check / Create Service Principal
+        id: service_principal
+        env:
+          APP_ID: ${{ steps.entra_app.outputs.app_id }}
+        run: |
+          echo "=== サービスプリンシパルの確認 ==="
+          SP_OID=$(az ad sp show \
+            --id "$APP_ID" \
+            --query id \
+            --output tsv 2>/dev/null || echo "")
+
+          if [ -z "$SP_OID" ]; then
+            echo "サービスプリンシパルが存在しません。作成します..."
+            SP_OID=$(az ad sp create \
+              --id "$APP_ID" \
+              --query id \
+              --output tsv)
+            echo "✓ サービスプリンシパルを作成しました: $SP_OID"
+          else
+            echo "✓ サービスプリンシパルは既に存在します (スキップ): $SP_OID"
+          fi
+
+          echo "sp_oid=$SP_OID" >> $GITHUB_OUTPUT
+
+      # =====================================================================
+      # フェデレーション資格情報 (存在確認 → なければ追加)
+      # =====================================================================
+      - name: Check / Create Federated Credential
+        env:
+          APP_ID: ${{ steps.entra_app.outputs.app_id }}
+          GITHUB_ORG: ${{ github.event_name == 'workflow_dispatch' && inputs.github_org || github.repository_owner }}
+        run: |
+          echo "=== フェデレーション資格情報の確認 ==="
+          CRED_NAME="teamboard-main-deploy"
+          EXISTING=$(az ad app federated-credential list \
+            --id "$APP_ID" \
+            --query "[?name=='$CRED_NAME'].name" \
+            --output tsv 2>/dev/null || echo "")
+
+          if [ -z "$EXISTING" ]; then
+            echo "フェデレーション資格情報が存在しません。作成します..."
+            az ad app federated-credential create \
+              --id "$APP_ID" \
+              --parameters "{
+                \"name\": \"$CRED_NAME\",
+                \"issuer\": \"https://token.actions.githubusercontent.com\",
+                \"subject\": \"repo:$GITHUB_ORG/TeamManagementTool:ref:refs/heads/main\",
+                \"audiences\": [\"api://AzureADTokenExchange\"]
+              }"
+            echo "✓ フェデレーション資格情報を作成しました"
+          else
+            echo "✓ フェデレーション資格情報は既に存在します (スキップ): $EXISTING"
+          fi
+
+      # =====================================================================
+      # リソースグループ (存在確認 → なければ作成)
+      # =====================================================================
+      - name: Check / Create Resource Group
+        run: |
+          echo "=== リソースグループの確認 ==="
+          if az group exists --name "$RESOURCE_GROUP" | grep -q "true"; then
+            echo "✓ リソースグループは既に存在します (スキップ): $RESOURCE_GROUP"
+          else
+            echo "リソースグループが存在しません。作成します..."
+            az group create \
+              --name "$RESOURCE_GROUP" \
+              --location "$LOCATION" \
+              --tags Project="$PROJECT_NAME" ManagedBy="GitHubActions"
+            echo "✓ リソースグループを作成しました: $RESOURCE_GROUP"
+          fi
+
+      # =====================================================================
+      # ARM テンプレートデプロイ (Incremental モード = べき等)
+      # 存在するリソース: 設定を更新
+      # 存在しないリソース: 新規作成
+      # =====================================================================
+      - name: Deploy ARM Template (Incremental / Idempotent)
+        id: arm_deploy
+        env:
+          MONGODB_URL: ${{ inputs.mongodb_url || secrets.MONGODB_URL }}
+          JWT_SECRET_KEY: ${{ inputs.jwt_secret_key || secrets.JWT_SECRET_KEY }}
+          ALLOWED_EMAILS: ${{ inputs.allowed_emails || '' }}
+        run: |
+          echo "=== ARM テンプレートのデプロイ (Incremental モード) ==="
+          DEPLOY_OUTPUT=$(az deployment group create \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "azuredeploy-$(date +%Y%m%d%H%M%S)" \
+            --template-file infra/azure/azuredeploy.json \
+            --mode Incremental \
+            --parameters \
+              projectName="$PROJECT_NAME" \
+              location="$LOCATION" \
+              mongodbUrl="$MONGODB_URL" \
+              jwtSecretKey="$JWT_SECRET_KEY" \
+              allowedEmails="$ALLOWED_EMAILS" \
+            --query properties.outputs \
+            --output json)
+
+          echo "ARM デプロイ完了"
+          echo "$DEPLOY_OUTPUT" | jq .
+
+          # 各 Output 値を取り出す
+          FUNC_APP_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.functionAppName.value')
+          FUNC_APP_URL=$(echo "$DEPLOY_OUTPUT" | jq -r '.functionAppUrl.value')
+          SWA_NAME=$(echo "$DEPLOY_OUTPUT" | jq -r '.staticWebAppName.value')
+          SWA_URL=$(echo "$DEPLOY_OUTPUT" | jq -r '.staticWebAppUrl.value')
+
+          echo "function_app_name=$FUNC_APP_NAME" >> $GITHUB_OUTPUT
+          echo "function_app_url=$FUNC_APP_URL" >> $GITHUB_OUTPUT
+          echo "swa_name=$SWA_NAME" >> $GITHUB_OUTPUT
+          echo "swa_url=https://$SWA_URL" >> $GITHUB_OUTPUT
+
+      # =====================================================================
+      # RBAC ロール割り当て (存在確認 → なければ追加)
+      # =====================================================================
+      - name: Check / Create RBAC Role Assignment
+        env:
+          APP_ID: ${{ steps.entra_app.outputs.app_id }}
+        run: |
+          echo "=== RBAC ロール割り当ての確認 ==="
+          SUB_ID=$(az account show --query id --output tsv)
+          SCOPE="/subscriptions/$SUB_ID/resourceGroups/$RESOURCE_GROUP"
+
+          EXISTING=$(az role assignment list \
+            --assignee "$APP_ID" \
+            --role "Contributor" \
+            --scope "$SCOPE" \
+            --query "[0].id" \
+            --output tsv 2>/dev/null || echo "")
+
+          if [ -z "$EXISTING" ]; then
+            echo "RBAC ロール割り当てが存在しません。作成します..."
+            az role assignment create \
+              --assignee "$APP_ID" \
+              --role "Contributor" \
+              --scope "$SCOPE"
+            echo "✓ Contributor ロールを割り当てました"
+          else
+            echo "✓ RBAC ロール割り当ては既に存在します (スキップ)"
+          fi
+
+      # =====================================================================
+      # SWA デプロイトークン取得
+      # =====================================================================
+      - name: Get Static Web Apps Deployment Token
+        id: swa_token
+        env:
+          SWA_NAME: ${{ steps.arm_deploy.outputs.swa_name }}
+        run: |
+          echo "=== SWA デプロイトークンの取得 ==="
+          SWA_TOKEN=$(az staticwebapp secrets list \
+            --name "$SWA_NAME" \
+            --query "properties.apiKey" \
+            --output tsv)
+          echo "swa_token=$SWA_TOKEN" >> $GITHUB_OUTPUT
+          echo "✓ SWA デプロイトークンを取得しました"
+
+      # =====================================================================
+      # 結果サマリー (GitHub Secrets に設定する値を表示)
+      # =====================================================================
+      - name: Print Deployment Summary
+        env:
+          APP_ID: ${{ steps.entra_app.outputs.app_id }}
+          FUNC_APP_NAME: ${{ steps.arm_deploy.outputs.function_app_name }}
+          FUNC_APP_URL: ${{ steps.arm_deploy.outputs.function_app_url }}
+          SWA_NAME: ${{ steps.arm_deploy.outputs.swa_name }}
+          SWA_URL: ${{ steps.arm_deploy.outputs.swa_url }}
+        run: |
+          TENANT_ID=$(az account show --query tenantId --output tsv)
+          SUB_ID=$(az account show --query id --output tsv)
+
+          echo ""
+          echo "================================================================"
+          echo "  デプロイ完了！以下の値を GitHub Secrets に設定してください"
+          echo "================================================================"
+          echo ""
+          echo "【OIDC 認証 (既に設定済みの場合はスキップ)】"
+          echo "  AZURE_CLIENT_ID       = $APP_ID"
+          echo "  AZURE_TENANT_ID       = $TENANT_ID"
+          echo "  AZURE_SUBSCRIPTION_ID = $SUB_ID"
+          echo ""
+          echo "【バックエンドデプロイ】"
+          echo "  AZURE_FUNCTIONAPP_NAME = $FUNC_APP_NAME"
+          echo ""
+          echo "【フロントエンドデプロイ】"
+          echo "  AZURE_SWA_TOKEN    = (Secrets に安全に設定してください)"
+          echo "  VITE_API_URL_AZURE = $FUNC_APP_URL"
+          echo ""
+          echo "【動作確認】"
+          echo "  フロントエンド URL: $SWA_URL"
+          echo "  API ヘルスチェック: $FUNC_APP_URL/api/health"
+          echo ""
+          echo "================================================================"
+          echo "  次のステップ: backend-deploy-azure.yml / frontend-deploy-azure.yml"
+          echo "  が main への push 時に自動実行されます"
+          echo "================================================================"
+
+      - name: Set SWA Token as Step Summary (masked)
+        env:
+          SWA_TOKEN: ${{ steps.swa_token.outputs.swa_token }}
+          SWA_URL: ${{ steps.arm_deploy.outputs.swa_url }}
+          FUNC_APP_URL: ${{ steps.arm_deploy.outputs.function_app_url }}
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## Azure リソース作成完了
+
+          | Secret 名 | 値 |
+          |-----------|---|
+          | \`AZURE_FUNCTIONAPP_NAME\` | \`${{ steps.arm_deploy.outputs.function_app_name }}\` |
+          | \`VITE_API_URL_AZURE\` | \`$FUNC_APP_URL\` |
+          | \`AZURE_SWA_TOKEN\` | *(ログに表示されたトークンを設定)* |
+
+          ### 動作確認 URL
+          - フロントエンド: $SWA_URL
+          - API ヘルスチェック: $FUNC_APP_URL/api/health
+          EOF
