@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" width="900" height="620" font-family="'Segoe UI', Arial, sans-serif">
+
+  <!-- Background -->
+  <rect width="900" height="620" fill="#f8fafc" rx="12"/>
+
+  <!-- Title -->
+  <text x="450" y="40" text-anchor="middle" font-size="20" font-weight="bold" fill="#1e293b">TeamBoard — Azure アーキテクチャ構成</text>
+  <text x="450" y="62" text-anchor="middle" font-size="13" fill="#64748b">Region: Japan East (東日本)</text>
+
+  <!-- ===== User ===== -->
+  <g transform="translate(20, 90)">
+    <rect width="120" height="60" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="60" y="28" text-anchor="middle" font-size="22">🌐</text>
+    <text x="60" y="48" text-anchor="middle" font-size="12" font-weight="600" fill="#1e3a5f">ブラウザ</text>
+  </g>
+
+  <!-- ===== Azure Boundary ===== -->
+  <rect x="170" y="80" width="600" height="430" rx="12" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="2" stroke-dasharray="8,4"/>
+  <text x="190" y="102" font-size="12" fill="#0ea5e9" font-weight="600">Microsoft Azure (Japan East)</text>
+
+  <!-- ===== Frontend Layer ===== -->
+  <rect x="185" y="110" width="180" height="90" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+  <text x="275" y="128" text-anchor="middle" font-size="11" fill="#0369a1" font-weight="700">フロントエンド層</text>
+  <text x="275" y="148" text-anchor="middle" font-size="20">📦</text>
+  <text x="275" y="168" text-anchor="middle" font-size="12" font-weight="600" fill="#0c4a6e">Azure Static Web Apps</text>
+  <text x="275" y="184" text-anchor="middle" font-size="10" fill="#0369a1">Free / CDN + SSL 自動管理</text>
+
+  <!-- ===== Backend Layer ===== -->
+  <rect x="390" y="110" width="180" height="90" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="480" y="128" text-anchor="middle" font-size="11" fill="#15803d" font-weight="700">バックエンド層</text>
+  <text x="480" y="148" text-anchor="middle" font-size="20">⚡</text>
+  <text x="480" y="168" text-anchor="middle" font-size="12" font-weight="600" fill="#14532d">Azure Functions</text>
+  <text x="480" y="184" text-anchor="middle" font-size="10" fill="#15803d">Python 3.11 / Consumption Plan</text>
+
+  <!-- ===== Security Layer ===== -->
+  <rect x="185" y="240" width="180" height="110" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="275" y="258" text-anchor="middle" font-size="11" fill="#b45309" font-weight="700">セキュリティ層</text>
+  <!-- Key Vault -->
+  <text x="275" y="278" text-anchor="middle" font-size="18">🔑</text>
+  <text x="275" y="295" text-anchor="middle" font-size="11" font-weight="600" fill="#78350f">Azure Key Vault</text>
+  <text x="275" y="309" text-anchor="middle" font-size="10" fill="#b45309">シークレット管理</text>
+  <!-- Managed Identity -->
+  <text x="275" y="328" text-anchor="middle" font-size="10" font-weight="600" fill="#78350f">Managed Identity</text>
+  <text x="275" y="342" text-anchor="middle" font-size="10" fill="#b45309">+ Federated Credential</text>
+
+  <!-- ===== Monitoring Layer ===== -->
+  <rect x="390" y="240" width="180" height="110" rx="8" fill="#fae8ff" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="480" y="258" text-anchor="middle" font-size="11" fill="#9333ea" font-weight="700">監視層</text>
+  <text x="480" y="278" text-anchor="middle" font-size="18">📊</text>
+  <text x="480" y="295" text-anchor="middle" font-size="11" font-weight="600" fill="#581c87">Application Insights</text>
+  <text x="480" y="309" text-anchor="middle" font-size="10" fill="#9333ea">+ Log Analytics Workspace</text>
+  <text x="480" y="328" text-anchor="middle" font-size="10" fill="#9333ea">テレメトリ・ログ・メトリクス</text>
+  <text x="480" y="342" text-anchor="middle" font-size="10" fill="#9333ea">保持: 30日</text>
+
+  <!-- ===== External Services ===== -->
+  <!-- MongoDB Atlas -->
+  <rect x="620" y="110" width="130" height="90" rx="8" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+  <text x="685" y="128" text-anchor="middle" font-size="11" fill="#047857" font-weight="700">外部サービス</text>
+  <text x="685" y="148" text-anchor="middle" font-size="20">🍃</text>
+  <text x="685" y="168" text-anchor="middle" font-size="12" font-weight="600" fill="#064e3b">MongoDB Atlas</text>
+  <text x="685" y="184" text-anchor="middle" font-size="10" fill="#047857">クラウド DB (TLS)</text>
+
+  <!-- GitHub Actions -->
+  <rect x="620" y="240" width="130" height="110" rx="8" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/>
+  <text x="685" y="258" text-anchor="middle" font-size="11" fill="#475569" font-weight="700">CI/CD</text>
+  <text x="685" y="278" text-anchor="middle" font-size="20">🐙</text>
+  <text x="685" y="295" text-anchor="middle" font-size="12" font-weight="600" fill="#1e293b">GitHub Actions</text>
+  <text x="685" y="311" text-anchor="middle" font-size="10" fill="#475569">push (main)</text>
+  <text x="685" y="325" text-anchor="middle" font-size="10" fill="#475569">→ Backend: zip deploy</text>
+  <text x="685" y="339" text-anchor="middle" font-size="10" fill="#475569">→ Frontend: SWA deploy</text>
+
+  <!-- ===== Arrows ===== -->
+
+  <!-- User → SWA (HTTPS) -->
+  <line x1="140" y1="120" x2="185" y2="150" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <text x="155" y="115" font-size="10" fill="#3b82f6">HTTPS</text>
+
+  <!-- SWA → Functions (API call) -->
+  <line x1="365" y1="155" x2="390" y2="155" stroke="#0ea5e9" stroke-width="2" marker-end="url(#arrowCyan)"/>
+  <text x="368" y="148" font-size="9" fill="#0284c7">/api/*</text>
+
+  <!-- Functions → MongoDB (Motor) -->
+  <line x1="570" y1="155" x2="620" y2="155" stroke="#16a34a" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <text x="573" y="148" font-size="9" fill="#16a34a">Motor</text>
+
+  <!-- Functions → Key Vault (参照) -->
+  <line x1="480" y1="200" x2="360" y2="270" stroke="#d97706" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowOrange)"/>
+  <text x="390" y="248" font-size="9" fill="#b45309">KV 参照</text>
+
+  <!-- Functions → App Insights (テレメトリ) -->
+  <line x1="480" y1="200" x2="480" y2="240" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowPurple)"/>
+  <text x="488" y="228" font-size="9" fill="#9333ea">テレメトリ</text>
+
+  <!-- GitHub → Managed Identity (OIDC) -->
+  <line x1="620" y1="295" x2="365" y2="310" stroke="#78350f" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowBrown)"/>
+  <text x="450" y="332" font-size="9" fill="#78350f">OIDC</text>
+
+  <!-- GitHub → Functions (zip deploy) -->
+  <line x1="620" y1="280" x2="570" y2="200" stroke="#475569" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+  <text x="585" y="248" font-size="9" fill="#475569">zip deploy</text>
+
+  <!-- GitHub → SWA (SWA deploy) -->
+  <line x1="620" y1="295" x2="365" y2="175" stroke="#475569" stroke-width="1.5" marker-end="url(#arrowGray2)"/>
+  <text x="445" y="188" font-size="9" fill="#475569">SWA deploy</text>
+
+  <!-- ===== Legend ===== -->
+  <rect x="20" y="390" width="140" height="110" rx="8" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+  <text x="90" y="408" text-anchor="middle" font-size="11" font-weight="700" fill="#1e293b">凡例</text>
+  <line x1="30" y1="422" x2="60" y2="422" stroke="#3b82f6" stroke-width="2"/>
+  <text x="65" y="426" font-size="10" fill="#374151">同期通信 (HTTPS)</text>
+  <line x1="30" y1="440" x2="60" y2="440" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="65" y="444" font-size="10" fill="#374151">非同期 / 参照</text>
+  <line x1="30" y1="458" x2="60" y2="458" stroke="#475569" stroke-width="1.5"/>
+  <text x="65" y="462" font-size="10" fill="#374151">CI/CD デプロイ</text>
+  <text x="30" y="488" font-size="10" fill="#64748b">MongoDB Atlas は</text>
+  <text x="30" y="500" font-size="10" fill="#64748b">変更なし（共通）</text>
+
+  <!-- ===== Service Comparison ===== -->
+  <rect x="20" y="510" width="860" height="90" rx="8" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+  <text x="450" y="530" text-anchor="middle" font-size="12" font-weight="700" fill="#1e293b">AWS → Azure サービス対応</text>
+  <text x="30" y="550" font-size="10" fill="#374151">S3 + CloudFront</text>
+  <text x="145" y="550" font-size="12" fill="#64748b">→</text>
+  <text x="160" y="550" font-size="10" font-weight="600" fill="#0284c7">Static Web Apps (Free)</text>
+  <text x="310" y="550" font-size="10" fill="#374151">API Gateway + Lambda</text>
+  <text x="445" y="550" font-size="12" fill="#64748b">→</text>
+  <text x="460" y="550" font-size="10" font-weight="600" fill="#15803d">Azure Functions (Consumption)</text>
+  <text x="660" y="550" font-size="10" fill="#374151">SSM Parameter Store</text>
+  <text x="775" y="550" font-size="12" fill="#64748b">→</text>
+  <text x="790" y="550" font-size="10" font-weight="600" fill="#b45309">Key Vault</text>
+  <text x="30" y="570" font-size="10" fill="#374151">IAM Role + OIDC Provider</text>
+  <text x="155" y="570" font-size="12" fill="#64748b">→</text>
+  <text x="170" y="570" font-size="10" font-weight="600" fill="#78350f">Managed Identity + Federated Credential</text>
+  <text x="460" y="570" font-size="10" fill="#374151">CloudWatch Logs</text>
+  <text x="555" y="570" font-size="12" fill="#64748b">→</text>
+  <text x="570" y="570" font-size="10" font-weight="600" fill="#9333ea">Application Insights + Log Analytics</text>
+  <text x="30" y="590" font-size="10" fill="#374151">CloudFormation</text>
+  <text x="120" y="590" font-size="12" fill="#64748b">→</text>
+  <text x="135" y="590" font-size="10" font-weight="600" fill="#0c4a6e">ARM テンプレート (infra/azure/azuredeploy.json)</text>
+
+  <!-- Arrow Markers -->
+  <defs>
+    <marker id="arrowBlue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrowCyan" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0ea5e9"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#d97706"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#a855f7"/>
+    </marker>
+    <marker id="arrowBrown" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#78350f"/>
+    </marker>
+    <marker id="arrowGray" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+    <marker id="arrowGray2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+  </defs>
+</svg>
