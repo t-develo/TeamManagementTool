@@ -2,17 +2,20 @@ name: Deploy Frontend (Azure)
 
 on:
   push:
-    branches: [main]
+    branches: ["**"]
     paths:
       - "frontend/**"
 
-# SWA deploy アクションは独自のデプロイトークンで認証するため OIDC 不要
 permissions:
+  id-token: write
   contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # main ブランチ → azure-prod 環境、それ以外 → azure-dev 環境
+    # 各 GitHub Environment に環境固有のシークレットを設定しておく
+    environment: ${{ github.ref_name == 'main' && 'azure-prod' || 'azure-dev' }}
     steps:
       - uses: actions/checkout@v4
 
