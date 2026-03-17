@@ -4,23 +4,39 @@ name: Provision Azure Resources
 # - リソースが存在しない場合: 作成
 # - リソースが既に存在する場合: スキップ (ARM Incremental モードで更新)
 #
+# 【dev/prod 環境の使い分け】
+#   - environment=dev  → GitHub Environment "azure-dev"  のシークレットに設定する値を出力
+#   - environment=prod → GitHub Environment "azure-prod" のシークレットに設定する値を出力
+#
+# 【フェデレーション資格情報について】
+#   このワークフローはブランチではなく GitHub Environment ベースの OIDC を使用します。
+#   backend-deploy-azure.yml / frontend-deploy-azure.yml が environment: azure-dev / azure-prod
+#   で動作するため、資格情報の subject も environment:<env名> 形式にする必要があります。
+#
 # 【前提条件】初回実行前に手動で一度だけ以下を実行:
 #   az ad app create --display-name "teamboard-github-actions"
 #   az ad sp create --id <CLIENT_ID>
 #   az ad app federated-credential create --id <CLIENT_ID> --parameters '{...}'
-# その後 GitHub Secrets に AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID を設定する
+# その後 GitHub Secrets (リポジトリレベル) に
+#   AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID を設定する
 
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: "デプロイ環境"
+        required: true
+        default: "dev"
+        type: choice
+        options: [dev, prod]
       project_name:
         description: "リソース名プレフィックス (例: teamboard)"
         required: true
         default: "teamboard"
       resource_group:
-        description: "リソースグループ名 (例: teamboard-rg)"
+        description: "リソースグループ名 (例: teamboard-rg-dev)"
         required: true
-        default: "teamboard-rg"
+        default: "teamboard-rg-dev"
       location:
         description: "Azureリージョン"
         required: true
@@ -51,8 +67,9 @@ jobs:
   provision:
     runs-on: ubuntu-latest
     env:
+      DEPLOY_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'prod' }}
       PROJECT_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.project_name || 'teamboard' }}
-      RESOURCE_GROUP: ${{ github.event_name == 'workflow_dispatch' && inputs.resource_group || 'teamboard-rg' }}
+      RESOURCE_GROUP: ${{ github.event_name == 'workflow_dispatch' && inputs.resource_group || 'teamboard-rg-prod' }}
       LOCATION: ${{ github.event_name == 'workflow_dispatch' && inputs.location || 'japaneast' }}
       APP_DISPLAY_NAME: "teamboard-github-actions"
 
@@ -122,13 +139,19 @@ jobs:
       # =====================================================================
       # フェデレーション資格情報 (存在確認 → なければ追加)
       # =====================================================================
+      # GitHub Environment ベースの subject を使用する。
+      # backend-deploy-azure.yml / frontend-deploy-azure.yml が
+      # environment: azure-dev / azure-prod で動作するため、
+      # ブランチ (ref:refs/heads/main) ではなく
+      # environment:azure-<env> 形式にする必要がある。
       - name: Check / Create Federated Credential
         env:
           APP_ID: ${{ steps.entra_app.outputs.app_id }}
           GITHUB_ORG: ${{ github.event_name == 'workflow_dispatch' && inputs.github_org || github.repository_owner }}
         run: |
           echo "=== フェデレーション資格情報の確認 ==="
-          CRED_NAME="teamboard-main-deploy"
+          GITHUB_ENV_NAME="azure-$DEPLOY_ENV"
+          CRED_NAME="teamboard-$DEPLOY_ENV-deploy"
           EXISTING=$(az ad app federated-credential list \
             --id "$APP_ID" \
             --query "[?name=='$CRED_NAME'].name" \
@@ -141,10 +164,10 @@ jobs:
               --parameters "{
                 \"name\": \"$CRED_NAME\",
                 \"issuer\": \"https://token.actions.githubusercontent.com\",
-                \"subject\": \"repo:$GITHUB_ORG/TeamManagementTool:ref:refs/heads/main\",
+                \"subject\": \"repo:$GITHUB_ORG/TeamManagementTool:environment:$GITHUB_ENV_NAME\",
                 \"audiences\": [\"api://AzureADTokenExchange\"]
               }"
-            echo "✓ フェデレーション資格情報を作成しました"
+            echo "✓ フェデレーション資格情報を作成しました (subject: environment:$GITHUB_ENV_NAME)"
           else
             echo "✓ フェデレーション資格情報は既に存在します (スキップ): $EXISTING"
           fi
@@ -265,22 +288,26 @@ jobs:
         run: |
           TENANT_ID=$(az account show --query tenantId --output tsv)
           SUB_ID=$(az account show --query id --output tsv)
+          GITHUB_ENV_NAME="azure-$DEPLOY_ENV"
 
           echo ""
           echo "================================================================"
-          echo "  デプロイ完了！以下の値を GitHub Secrets に設定してください"
+          echo "  デプロイ完了！GitHub Environment \"$GITHUB_ENV_NAME\" に"
+          echo "  以下の Secrets を設定してください"
+          echo "  (Settings > Environments > $GITHUB_ENV_NAME > Secrets)"
           echo "================================================================"
           echo ""
-          echo "【OIDC 認証 (既に設定済みの場合はスキップ)】"
+          echo "【OIDC 認証】"
           echo "  AZURE_CLIENT_ID       = $APP_ID"
           echo "  AZURE_TENANT_ID       = $TENANT_ID"
           echo "  AZURE_SUBSCRIPTION_ID = $SUB_ID"
           echo ""
           echo "【バックエンドデプロイ】"
           echo "  AZURE_FUNCTIONAPP_NAME = $FUNC_APP_NAME"
+          echo "  AZURE_RESOURCE_GROUP   = $RESOURCE_GROUP"
           echo ""
           echo "【フロントエンドデプロイ】"
-          echo "  AZURE_SWA_TOKEN    = (Secrets に安全に設定してください)"
+          echo "  AZURE_SWA_TOKEN    = (下記 Step Summary のトークンを設定)"
           echo "  VITE_API_URL_AZURE = $FUNC_APP_URL"
           echo ""
           echo "【動作確認】"
@@ -288,8 +315,9 @@ jobs:
           echo "  API ヘルスチェック: $FUNC_APP_URL/api/health"
           echo ""
           echo "================================================================"
-          echo "  次のステップ: backend-deploy-azure.yml / frontend-deploy-azure.yml"
-          echo "  が main への push 時に自動実行されます"
+          echo "  dev/prod それぞれの環境でこのワークフローを実行してください"
+          echo "  environment=dev  → GitHub Environment \"azure-dev\"  に設定"
+          echo "  environment=prod → GitHub Environment \"azure-prod\" に設定"
           echo "================================================================"
 
       - name: Set SWA Token as Step Summary (masked)
@@ -298,12 +326,16 @@ jobs:
           SWA_URL: ${{ steps.arm_deploy.outputs.swa_url }}
           FUNC_APP_URL: ${{ steps.arm_deploy.outputs.function_app_url }}
         run: |
+          GITHUB_ENV_NAME="azure-$DEPLOY_ENV"
           cat >> $GITHUB_STEP_SUMMARY << EOF
           ## Azure リソース作成完了
+
+          GitHub Environment **\`$GITHUB_ENV_NAME\`** に以下の Secrets を設定してください。
 
           | Secret 名 | 値 |
           |-----------|---|
           | \`AZURE_FUNCTIONAPP_NAME\` | \`${{ steps.arm_deploy.outputs.function_app_name }}\` |
+          | \`AZURE_RESOURCE_GROUP\` | \`$RESOURCE_GROUP\` |
           | \`VITE_API_URL_AZURE\` | \`$FUNC_APP_URL\` |
           | \`AZURE_SWA_TOKEN\` | *(ログに表示されたトークンを設定)* |
 
