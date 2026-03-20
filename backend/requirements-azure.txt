@@ -1,10 +1,11 @@
 # Azure Functions 用の依存パッケージ
 # 通常の requirements.txt から Mangum を除き、azure-functions を追加
-# Mangum は AWS Lambda 専用のため Azure Functions 環境では不要だが、あっても動作に支障はない
+# Mangum は AWS Lambda 専用だが app/main.py がインポートするため追加が必要
 
 fastapi==0.115.6
 uvicorn[standard]==0.34.0
 azure-functions>=1.21.0
+mangum==0.19.0
 motor==3.6.0
 beanie==1.27.0
 pydantic[email]==2.10.4
