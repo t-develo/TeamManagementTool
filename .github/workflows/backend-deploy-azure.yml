@@ -2,12 +2,10 @@ name: Deploy Backend (Azure)
 
 on:
   push:
-    branches: [main]
+    branches: ["**"]
     paths:
       - "backend/**"
 
-# OIDC 認証に必要な権限
-# AWS 版と同様に id-token: write が必要
 permissions:
   id-token: write
   contents: read
@@ -15,6 +13,9 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # main ブランチ → azure-prod 環境、それ以外 → azure-dev 環境
+    # 各 GitHub Environment に環境固有のシークレットを設定しておく
+    environment: ${{ github.ref_name == 'main' && 'azure-prod' || 'azure-dev' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -22,22 +23,16 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
-        # requirements-azure.txt を使用（Mangum なし、azure-functions あり）
-        run: pip install -r requirements-azure.txt -t ./package
-        working-directory: backend
-
-      - name: Copy application code
-        # function_app.py と host.json が ZIP ルートに来るようにコピーする
-        # app/ ディレクトリも ZIP ルート直下に含める
+      - name: Install dependencies into package directory
         run: |
+          pip install -r requirements-azure.txt -t ./package
+          cp -r app ./package/
           cp function_app.py ./package/
           cp host.json ./package/
-          cp -r app ./package/
         working-directory: backend
 
       - name: Create deployment ZIP
-        # ZIP のルートに function_app.py, host.json, app/ が含まれていることを確認する
+        # function_app.py と host.json が ZIP ルートに来るようにする
         run: cd package && zip -r ../api-azure.zip .
         working-directory: backend
 
@@ -49,10 +44,8 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy to Azure Functions
-        # az functionapp deployment source config-zip でデプロイ
         run: |
           az functionapp deployment source config-zip \
-            --resource-group teamboard-rg \
             --name ${{ secrets.AZURE_FUNCTIONAPP_NAME }} \
-            --src api-azure.zip
-        working-directory: backend
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --src backend/api-azure.zip

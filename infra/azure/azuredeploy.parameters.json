@@ -9,13 +9,13 @@
       "value": "japaneast"
     },
     "mongodbUrl": {
-      "value": "mongodb+srv://<user>:<password>@<cluster>.mongodb.net/?retryWrites=true&w=majority"
+      "value": "mongodb+srv://<user>:<password>@<cluster>.mongodb.net/"
     },
     "mongodbDbName": {
       "value": "teamboard"
     },
     "jwtSecretKey": {
-      "value": "<openssl rand -hex 32 で生成したキーに置き換えてください>"
+      "value": "<openssl rand -hex 32 で生成した値>"
     },
     "jwtAlgorithm": {
       "value": "HS256"
@@ -27,7 +27,7 @@
       "value": ""
     },
     "corsOrigins": {
-      "value": ""
+      "value": "*"
     },
     "logRetentionDays": {
       "value": 30
