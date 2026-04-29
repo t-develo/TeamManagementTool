@@ -1,17 +1,23 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from mangum import Mangum
 
 from app.config import settings
 from app.db.database import init_db
 from app.routers import auth, dashboard, members, projects, tasks
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
+    try:
+        await init_db()
+    except Exception:
+        logger.exception("Database initialization failed")
+        raise
     yield
 
 
@@ -37,4 +43,9 @@ async def health():
     return {"status": "ok"}
 
 
-handler = Mangum(app)
+try:
+    from mangum import Mangum
+
+    handler = Mangum(app)
+except ImportError:
+    pass

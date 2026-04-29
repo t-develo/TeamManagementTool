@@ -43,7 +43,7 @@ async def get_current_user_by_token(token: str) -> User:
     user_id = payload.get("sub")
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    user = await User.find_one(User.email == user_id)
+    user = await User.get(PydanticObjectId(user_id))
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     if not user.is_active:
