@@ -1,3 +1,5 @@
+import logging
+
 from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -6,10 +8,23 @@ from app.models.member import Member
 from app.models.project import Project
 from app.models.user import User
 
+logger = logging.getLogger(__name__)
 
-async def init_db():
-    client = AsyncIOMotorClient(settings.MONGODB_URL)
+
+async def init_db() -> None:
+    logger.info("Connecting to MongoDB: %s", settings.MONGODB_URL[:20] + "***")
+    client = AsyncIOMotorClient(
+        settings.MONGODB_URL,
+        serverSelectionTimeoutMS=10_000,
+        connectTimeoutMS=10_000,
+        socketTimeoutMS=20_000,
+    )
     db = client[settings.MONGODB_DB_NAME]
+
+    # 接続を検証してから Beanie を初期化する
+    await db.command({"ping": 1})
+    logger.info("MongoDB ping OK — database: %s", settings.MONGODB_DB_NAME)
+
     await init_beanie(
         database=db,
         document_models=[User, Member, Project],
@@ -23,3 +38,4 @@ async def init_db():
     await projects_col.create_index("status")
     await projects_col.create_index("start_date")
     await projects_col.create_index("tasks.assignee_id", sparse=True)
+    logger.info("Database initialization complete")
